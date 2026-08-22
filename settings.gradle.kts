@@ -10,6 +10,7 @@ plugins {
 }
 
 dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         mavenCentral()
     }
@@ -20,3 +21,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "inventory-backend"
 
+
+include(":app")
+include(":core:database")
+include(":features:product")

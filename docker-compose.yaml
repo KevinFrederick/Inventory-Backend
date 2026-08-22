@@ -1,0 +1,42 @@
+services:
+  postgres-db:
+    image: postgres:17
+    container_name: inventory-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASS}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  minio:
+    image: minio/minio
+    container_name: inventory-img-db
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASS}
+    command: server /data --console-address ":9001"
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+    volumes:
+      - minio_data:/data
+
+  ktor-backend:
+    container_name: inventory-be
+    build: .
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASS: ${POSTGRES_PASS}
+      POSTGRES_JDBC_URL: ${POSTGRES_JDBC_URL}
+    ports:
+      - "127.0.0.1:8081:8080"
+    depends_on:
+      - postgres-db
+      - minio
+
+volumes:
+  pg_data:
+  minio_data:
