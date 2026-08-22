@@ -14,7 +14,10 @@ fun Application.module() {
 
     configureSerialization()
     configureResources()
+    configureRouting()
+}
 
+fun Application.configureRouting() {
     routing {
         get ("/") {
             call.respondText("Server running!")
