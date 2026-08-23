@@ -13,6 +13,7 @@ fun Application.module() {
     configureDI()
 
     DatabaseFactory.init()
+    initializeDatabaseSchema()
 
     configureSerialization()
     configureResources()
