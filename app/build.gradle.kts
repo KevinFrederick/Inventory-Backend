@@ -14,13 +14,18 @@ application {
 
 dependencies {
     implementation(project(":core:database"))
+    implementation(project(":features:product"))
 
     implementation(ktorLibs.serialization.kotlinx.json)
+    implementation(ktorLibs.server.resources)
     implementation(ktorLibs.server.contentNegotiation)
     implementation(ktorLibs.server.core)
     implementation(ktorLibs.server.netty)
-    implementation(ktorLibs.server.resources)
     implementation(libs.logback.classic)
+
+    implementation(platform(libs.koin.bom))
+    implementation(libs.koin.ktor)
+    implementation(libs.koin.logger)
 
     testImplementation(kotlin("test"))
     testImplementation(ktorLibs.server.testHost)

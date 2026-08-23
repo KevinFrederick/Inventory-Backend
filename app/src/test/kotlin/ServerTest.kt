@@ -1,5 +1,7 @@
 package com.kevinfreyap
 
+import com.kevinfreyap.plugins.configureResources
+import com.kevinfreyap.plugins.configureSerialization
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.config.MapApplicationConfig

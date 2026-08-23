@@ -6,6 +6,9 @@ group = "com.kevinfreyap"
 version = "unspecified"
 
 dependencies {
+    implementation(platform(libs.koin.bom))
+    implementation(libs.koin.core)
+
     implementation(libs.exposed.core)
     implementation(libs.exposed.dao)
     implementation(libs.exposed.jdbc)
