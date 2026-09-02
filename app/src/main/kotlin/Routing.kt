@@ -1,6 +1,7 @@
 package com.kevinfreyap
 
-import api.categoryRoute
+import api.categoryRoutes
+import api.locationRoutes
 import io.ktor.server.application.Application
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
@@ -14,6 +15,7 @@ fun Application.configureRouting() {
         }
 
         productRoutes()
-        categoryRoute()
+        categoryRoutes()
+        locationRoutes()
     }
 }

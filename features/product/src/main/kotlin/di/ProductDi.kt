@@ -14,6 +14,12 @@ import domain.usecase.category.GetAllCategoryUseCase
 import domain.usecase.category.GetCategoryByIdUseCase
 import domain.usecase.category.InsertCategoryUseCase
 import domain.usecase.category.UpdateCategoryUseCase
+import domain.usecase.location.DeleteLocationUseCase
+import domain.usecase.location.GetAllLocationUseCase
+import domain.usecase.location.GetLocationByIdUseCase
+import domain.usecase.location.InsertLocationUseCase
+import domain.usecase.location.LocationUseCases
+import domain.usecase.location.UpdateLocationUseCase
 import domain.usecase.product.DeleteProductUseCase
 import domain.usecase.product.GetAllProductUseCase
 import domain.usecase.product.GetProductByIdUseCase
@@ -60,6 +66,22 @@ val productModule = module {
             insertCategory = get(),
             updateCategory = get(),
             deleteCategory = get(),
+        )
+    }
+
+    // Location Use Cases
+    factory { GetAllLocationUseCase(get()) }
+    factory { GetLocationByIdUseCase(get()) }
+    factory { InsertLocationUseCase(get()) }
+    factory { UpdateLocationUseCase(get()) }
+    factory { DeleteLocationUseCase(get()) }
+    factory {
+        LocationUseCases(
+            getAllLocation = get(),
+            getLocationById = get(),
+            insertLocation = get(),
+            updateLocation = get(),
+            deleteLocation = get(),
         )
     }
 }
