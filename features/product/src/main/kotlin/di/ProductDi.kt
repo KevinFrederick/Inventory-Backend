@@ -8,6 +8,12 @@ import domain.repository.CategoryRepository
 import domain.repository.LocationRepository
 import domain.repository.ProductRepository
 import domain.repository.StockBatchRepository
+import domain.usecase.category.CategoryUseCases
+import domain.usecase.category.DeleteCategoryUseCase
+import domain.usecase.category.GetAllCategoryUseCase
+import domain.usecase.category.GetCategoryByIdUseCase
+import domain.usecase.category.InsertCategoryUseCase
+import domain.usecase.category.UpdateCategoryUseCase
 import domain.usecase.product.DeleteProductUseCase
 import domain.usecase.product.GetAllProductUseCase
 import domain.usecase.product.GetProductByIdUseCase
@@ -41,5 +47,19 @@ val productModule = module {
         )
     }
 
-    //
+    // Category Use Cases
+    factory { GetAllCategoryUseCase(get()) }
+    factory { GetCategoryByIdUseCase(get()) }
+    factory { InsertCategoryUseCase(get()) }
+    factory { UpdateCategoryUseCase(get()) }
+    factory { DeleteCategoryUseCase(get()) }
+    factory {
+        CategoryUseCases(
+            getAllCategory = get(),
+            getCategoryById = get(),
+            insertCategory = get(),
+            updateCategory = get(),
+            deleteCategory = get(),
+        )
+    }
 }
