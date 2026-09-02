@@ -26,6 +26,11 @@ import domain.usecase.product.GetProductByIdUseCase
 import domain.usecase.product.InsertProductUseCase
 import domain.usecase.product.ProductUseCases
 import domain.usecase.product.UpdateProductUseCase
+import domain.usecase.stockbatch.DeleteStockBatchUseCase
+import domain.usecase.stockbatch.GetStockBatchByIdUseCase
+import domain.usecase.stockbatch.InsertStockBatchUseCase
+import domain.usecase.stockbatch.StockBatchUseCases
+import domain.usecase.stockbatch.UpdateStockBatchUseCase
 import org.koin.core.scope.get
 import org.koin.dsl.module
 
@@ -84,4 +89,19 @@ val productModule = module {
             deleteLocation = get(),
         )
     }
+
+    // Stock Batch Use Cases
+    factory { GetStockBatchByIdUseCase(get()) }
+    factory { InsertStockBatchUseCase(get()) }
+    factory { UpdateStockBatchUseCase(get()) }
+    factory { DeleteStockBatchUseCase(get()) }
+    factory {
+        StockBatchUseCases(
+            getBatchById = get(),
+            insertBatch = get(),
+            updateBatch = get(),
+            deleteBatch = get(),
+        )
+    }
+
 }
