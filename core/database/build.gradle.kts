@@ -6,9 +6,12 @@ group = "com.kevinfreyap"
 version = "unspecified"
 
 dependencies {
-    implementation(libs.exposed.core)
+    implementation(platform(libs.koin.bom))
+    implementation(libs.koin.core)
+
+    api(libs.exposed.core)
+    api(libs.exposed.jdbc)
     implementation(libs.exposed.dao)
-    implementation(libs.exposed.jdbc)
     implementation(libs.exposed.javatime)
 
     implementation(libs.postgresql)

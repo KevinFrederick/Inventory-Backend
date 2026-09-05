@@ -1,4 +1,4 @@
-package com.kevinfreyap
+package com.kevinfreyap.plugins
 
 import io.ktor.server.application.*
 import io.ktor.server.resources.*

@@ -1,0 +1,20 @@
+package data.mapper
+
+import data.local.table.StockBatchTable
+import domain.model.BatchId
+import domain.model.ProductId
+import domain.model.StockBatch
+import org.jetbrains.exposed.v1.core.ResultRow
+
+fun ResultRow.toStockBatch(): StockBatch =
+    StockBatch(
+        batchId = BatchId(this[StockBatchTable.batchId]),
+        productId = ProductId(this[StockBatchTable.productId]),
+        location = this.toLocation(),
+        quantity = this[StockBatchTable.quantity],
+        price = this[StockBatchTable.price],
+        expirationDate = this[StockBatchTable.expirationDate],
+        supplier = this[StockBatchTable.supplier],
+        createdAt = this[StockBatchTable.createdAt],
+        lastUpdated = this[StockBatchTable.lastUpdated]
+    )
