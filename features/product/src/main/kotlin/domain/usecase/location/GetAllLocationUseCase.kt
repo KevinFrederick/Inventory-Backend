@@ -2,7 +2,7 @@ package domain.usecase.location
 
 import domain.model.Location
 import domain.repository.LocationRepository
-import domain.result.DomainResult
+import result.DomainResult
 
 class GetAllLocationUseCase (
     private val repository: LocationRepository

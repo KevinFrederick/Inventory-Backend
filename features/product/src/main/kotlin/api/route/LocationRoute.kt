@@ -1,9 +1,11 @@
-package api
+package api.route
 
+import api.dto.request.LocationRequest
+import api.mapper.toDomain
 import api.mapper.toHttpStatusCode
-import domain.model.Location
+import api.mapper.toResponse
 import domain.model.LocationId
-import domain.result.DomainResult
+import result.DomainResult
 import domain.usecase.location.LocationUseCases
 import io.ktor.http.HttpStatusCode
 import io.ktor.resources.Resource
@@ -32,7 +34,7 @@ fun Route.locationRoutes() {
         when(
             val result = useCases.getAllLocation()
         ) {
-            is DomainResult.Success -> call.respond(HttpStatusCode.OK, result.data)
+            is DomainResult.Success -> call.respond(HttpStatusCode.OK, result.data.map { it.toResponse() })
             is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
         }
     }
@@ -43,30 +45,32 @@ fun Route.locationRoutes() {
         when(
             val result = useCases.getLocationById(locationId)
         ) {
-            is DomainResult.Success -> call.respond(HttpStatusCode.OK, result.data)
+            is DomainResult.Success -> call.respond(HttpStatusCode.OK, result.data.toResponse())
             is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
         }
     }
 
     post <LocationResource> {
-        val location = call.receive<Location>()
+        val locationRequest = call.receive<LocationRequest>()
+        val location = locationRequest.toDomain()
 
         when(
             val result = useCases.insertLocation(location)
         ) {
-            is DomainResult.Success -> call.respond(HttpStatusCode.Created, location)
+            is DomainResult.Success -> call.respond(HttpStatusCode.Created, location.toResponse())
             is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
         }
     }
 
     put <LocationResource.Id> { request ->
         val locationId = LocationId(request.id)
-        val updatedLocation = call.receive<Location>()
+        val locationRequest = call.receive<LocationRequest>()
+        val updatedLocation = locationRequest.toDomain()
 
         when (
             val result = useCases.updateLocation(locationId, updatedLocation)
         ) {
-            is DomainResult.Success -> call.respond(HttpStatusCode.OK, updatedLocation)
+            is DomainResult.Success -> call.respond(HttpStatusCode.OK, updatedLocation.toResponse())
             is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
         }
     }

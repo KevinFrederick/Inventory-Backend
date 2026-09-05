@@ -8,8 +8,8 @@ import data.mapper.toStockBatch
 import domain.model.BatchId
 import domain.model.StockBatch
 import domain.repository.StockBatchRepository
-import domain.result.DomainResult
-import domain.result.ErrorType
+import result.DomainResult
+import result.ErrorType
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.exceptions.ExposedSQLException
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
@@ -36,7 +36,7 @@ class StockBatchRepositoryImpl: StockBatchRepository {
         }
     }
 
-    override suspend fun insertBatch(batch: StockBatch): DomainResult<Unit> = dbQuery {
+    override suspend fun insertBatch(batch: StockBatch): DomainResult<StockBatch> = dbQuery {
         try {
             val insertStatement = StockBatchTable.insert {
                 it[batchId] = batch.batchId.value
@@ -46,6 +46,7 @@ class StockBatchRepositoryImpl: StockBatchRepository {
                 it[price] = batch.price
                 it[expirationDate] = batch.expirationDate
                 it[supplier] = batch.supplier
+                it[createdAt] = batch.createdAt
                 it[lastUpdated] = batch.lastUpdated
             }
 
@@ -57,7 +58,7 @@ class StockBatchRepositoryImpl: StockBatchRepository {
                 }
             }
 
-            DomainResult.Success(Unit)
+            DomainResult.Success(batch)
         } catch (e: ExposedSQLException) {
             val errorMessage = e.message ?: ""
 
@@ -72,7 +73,7 @@ class StockBatchRepositoryImpl: StockBatchRepository {
         }
     }
 
-    override suspend fun updateBatch(batch: StockBatch): DomainResult<Unit> = dbQuery {
+    override suspend fun updateBatch(batch: StockBatch): DomainResult<StockBatch> = dbQuery {
         try {
             val updatedRowsCount = StockBatchTable.update ({ StockBatchTable.batchId eq batch.batchId.value}) {
                 it[locationId] = batch.location.locationId.value
@@ -89,7 +90,7 @@ class StockBatchRepositoryImpl: StockBatchRepository {
                 it[lastUpdated] = batch.lastUpdated
             }
 
-            DomainResult.Success(Unit)
+            DomainResult.Success(batch)
         } catch (e: ExposedSQLException) {
             val errorMessage = e.message ?: ""
 

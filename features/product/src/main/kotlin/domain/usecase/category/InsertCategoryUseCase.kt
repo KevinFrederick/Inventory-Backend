@@ -2,7 +2,7 @@ package domain.usecase.category
 
 import domain.model.Category
 import domain.repository.CategoryRepository
-import domain.result.DomainResult
+import result.DomainResult
 
 class InsertCategoryUseCase (
     private val repository: CategoryRepository

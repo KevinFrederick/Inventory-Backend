@@ -6,9 +6,10 @@ import data.mapper.toLocation
 import domain.model.Location
 import domain.model.LocationId
 import domain.repository.LocationRepository
-import domain.result.DomainResult
-import domain.result.ErrorType
+import result.DomainResult
+import result.ErrorType
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.exceptions.ExposedSQLException
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
@@ -46,6 +47,23 @@ class LocationRepositoryImpl: LocationRepository {
             DomainResult.Success(location)
         } catch (e: Exception) {
             DomainResult.Error(e.message ?: "Unknown error", ErrorType.UNKNOWN)
+        }
+    }
+
+    override suspend fun getLocationsByIds(locationIds: List<LocationId>): DomainResult<List<Location>> = dbQuery {
+        try {
+            val idValues = locationIds.map { it.value }
+
+            val locationRows = LocationTable
+                .selectAll()
+                .where { LocationTable.locationId inList idValues }
+                .toList()
+
+            val locations = locationRows.map { it.toLocation() }
+
+            DomainResult.Success(locations)
+        } catch (e: Exception) {
+            DomainResult.Error(e.message ?: "Failed to fetch locations", ErrorType.UNKNOWN)
         }
     }
 

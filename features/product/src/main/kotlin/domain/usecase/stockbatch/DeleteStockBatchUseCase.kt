@@ -2,7 +2,7 @@ package domain.usecase.stockbatch
 
 import domain.model.BatchId
 import domain.repository.StockBatchRepository
-import domain.result.DomainResult
+import result.DomainResult
 
 class DeleteStockBatchUseCase(
     private val repository: StockBatchRepository

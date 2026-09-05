@@ -15,5 +15,6 @@ fun ResultRow.toStockBatch(): StockBatch =
         price = this[StockBatchTable.price],
         expirationDate = this[StockBatchTable.expirationDate],
         supplier = this[StockBatchTable.supplier],
+        createdAt = this[StockBatchTable.createdAt],
         lastUpdated = this[StockBatchTable.lastUpdated]
     )

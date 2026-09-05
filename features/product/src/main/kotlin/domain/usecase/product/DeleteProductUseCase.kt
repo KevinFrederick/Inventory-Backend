@@ -2,7 +2,7 @@ package domain.usecase.product
 
 import domain.model.ProductId
 import domain.repository.ProductRepository
-import domain.result.DomainResult
+import result.DomainResult
 
 class DeleteProductUseCase (
     private val repository: ProductRepository,

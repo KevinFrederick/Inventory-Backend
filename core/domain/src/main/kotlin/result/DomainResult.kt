@@ -1,4 +1,4 @@
-package domain.result
+package result
 
 sealed class DomainResult<out T> {
     data class Success <T>(val data: T) : DomainResult<T>()

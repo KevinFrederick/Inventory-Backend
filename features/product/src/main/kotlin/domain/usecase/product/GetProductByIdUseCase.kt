@@ -3,8 +3,8 @@ package domain.usecase.product
 import domain.model.Product
 import domain.model.ProductId
 import domain.repository.ProductRepository
-import domain.result.DomainResult
-import domain.result.ErrorType
+import result.DomainResult
+import result.ErrorType
 
 class GetProductByIdUseCase (
     private val repository: ProductRepository
@@ -14,10 +14,12 @@ class GetProductByIdUseCase (
             val result = repository.getProductById(productId)
         ) {
             is DomainResult.Success -> {
-                if (result.data == null) {
+                val product = result.data
+
+                if (product == null) {
                     DomainResult.Error("Product Not Found", ErrorType.NOT_FOUND)
                 } else {
-                    DomainResult.Success(result.data)
+                    DomainResult.Success(product)
                 }
             }
             is DomainResult.Error -> result

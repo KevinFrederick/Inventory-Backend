@@ -3,8 +3,8 @@ package domain.usecase.location
 import domain.model.Location
 import domain.model.LocationId
 import domain.repository.LocationRepository
-import domain.result.DomainResult
-import domain.result.ErrorType
+import result.DomainResult
+import result.ErrorType
 
 class UpdateLocationUseCase (
     private val repository: LocationRepository

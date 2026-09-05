@@ -1,6 +1,6 @@
 package api.mapper
 
-import domain.result.ErrorType
+import result.ErrorType
 import io.ktor.http.HttpStatusCode
 
 fun ErrorType.toHttpStatusCode(): HttpStatusCode {

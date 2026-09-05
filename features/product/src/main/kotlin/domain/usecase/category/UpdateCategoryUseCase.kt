@@ -3,8 +3,8 @@ package domain.usecase.category
 import domain.model.Category
 import domain.model.CategoryId
 import domain.repository.CategoryRepository
-import domain.result.DomainResult
-import domain.result.ErrorType
+import result.DomainResult
+import result.ErrorType
 
 class UpdateCategoryUseCase (
     private val repository: CategoryRepository

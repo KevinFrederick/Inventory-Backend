@@ -26,12 +26,14 @@ import domain.usecase.product.GetProductByIdUseCase
 import domain.usecase.product.InsertProductUseCase
 import domain.usecase.product.ProductUseCases
 import domain.usecase.product.UpdateProductUseCase
+import domain.usecase.product.image.DeleteProductImageUseCase
+import domain.usecase.product.image.UploadProductImageUseCase
 import domain.usecase.stockbatch.DeleteStockBatchUseCase
 import domain.usecase.stockbatch.GetStockBatchByIdUseCase
 import domain.usecase.stockbatch.InsertStockBatchUseCase
+import domain.usecase.util.StockBatchAssembler
 import domain.usecase.stockbatch.StockBatchUseCases
 import domain.usecase.stockbatch.UpdateStockBatchUseCase
-import org.koin.core.scope.get
 import org.koin.dsl.module
 
 val productModule = module {
@@ -42,19 +44,26 @@ val productModule = module {
     single<StockBatchRepository> { StockBatchRepositoryImpl() }
 
     //// Domain Layer (UseCases)
+    // Assembler
+    single<StockBatchAssembler> { StockBatchAssembler(get()) }
+
     // Product Use Cases
     factory { GetAllProductUseCase(get()) }
     factory { GetProductByIdUseCase(get()) }
-    factory { InsertProductUseCase(get()) }
-    factory { UpdateProductUseCase(get()) }
+    factory { InsertProductUseCase(get(), get(), get()) }
+    factory { UpdateProductUseCase(get(), get(), get()) }
+    factory { UploadProductImageUseCase(get(), get())}
     factory { DeleteProductUseCase(get()) }
+    factory { DeleteProductImageUseCase(get(), get()) }
     factory {
         ProductUseCases(
             getAllProduct = get(),
             getProductById = get(),
             insertProduct = get(),
             updateProduct = get(),
-            deleteProduct = get()
+            uploadProductImage = get(),
+            deleteProduct = get(),
+            deleteProductImage = get()
         )
     }
 
@@ -92,8 +101,8 @@ val productModule = module {
 
     // Stock Batch Use Cases
     factory { GetStockBatchByIdUseCase(get()) }
-    factory { InsertStockBatchUseCase(get()) }
-    factory { UpdateStockBatchUseCase(get()) }
+    factory { InsertStockBatchUseCase(get(), get()) }
+    factory { UpdateStockBatchUseCase(get(), get()) }
     factory { DeleteStockBatchUseCase(get()) }
     factory {
         StockBatchUseCases(

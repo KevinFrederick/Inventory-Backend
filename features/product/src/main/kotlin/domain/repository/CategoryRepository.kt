@@ -2,7 +2,7 @@ package domain.repository
 
 import domain.model.Category
 import domain.model.CategoryId
-import domain.result.DomainResult
+import result.DomainResult
 
 interface CategoryRepository {
     suspend fun getAllCategory(): DomainResult<List<Category>>

@@ -3,8 +3,8 @@ package domain.usecase.location
 import domain.model.Location
 import domain.model.LocationId
 import domain.repository.LocationRepository
-import domain.result.DomainResult
-import domain.result.ErrorType
+import result.DomainResult
+import result.ErrorType
 
 class GetLocationByIdUseCase (
     private val repository: LocationRepository
@@ -14,10 +14,12 @@ class GetLocationByIdUseCase (
             val result = repository.getLocationById(locationId)
         ) {
             is DomainResult.Success -> {
-                if (result.data == null) {
+                val location = result.data
+
+                if (location == null) {
                     DomainResult.Error("Location not found", ErrorType.NOT_FOUND)
                 } else {
-                    DomainResult.Success(result.data)
+                    DomainResult.Success(location)
                 }
             }
             is DomainResult.Error -> result

@@ -2,7 +2,7 @@ package domain.usecase.location
 
 import domain.model.LocationId
 import domain.repository.LocationRepository
-import domain.result.DomainResult
+import result.DomainResult
 
 class DeleteLocationUseCase (
     private val repository: LocationRepository

@@ -1,9 +1,11 @@
-package api
+package api.route
 
+import api.dto.request.CategoryRequest
+import api.mapper.toDomain
 import api.mapper.toHttpStatusCode
-import domain.model.Category
+import api.mapper.toResponse
 import domain.model.CategoryId
-import domain.result.DomainResult
+import result.DomainResult
 import domain.usecase.category.CategoryUseCases
 import io.ktor.http.HttpStatusCode
 import io.ktor.resources.Resource
@@ -13,7 +15,7 @@ import io.ktor.server.resources.get
 import io.ktor.server.resources.put
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.post
+import io.ktor.server.resources.post
 import kotlinx.serialization.Serializable
 import org.koin.ktor.ext.inject
 
@@ -32,7 +34,7 @@ fun Route.categoryRoutes() {
         when(
             val result = useCases.getAllCategory()
         ) {
-            is DomainResult.Success -> call.respond(HttpStatusCode.OK, result.data)
+            is DomainResult.Success -> call.respond(HttpStatusCode.OK, result.data.map { it.toResponse() })
             is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
         }
     }
@@ -43,30 +45,32 @@ fun Route.categoryRoutes() {
         when (
             val result = useCases.getCategoryById(categoryId)
         ) {
-            is DomainResult.Success -> call.respond(HttpStatusCode.OK, result.data)
+            is DomainResult.Success -> call.respond(HttpStatusCode.OK, result.data.toResponse())
             is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
         }
     }
 
     post <CategoryResource> {
-        val category = call.receive<Category>()
+        val categoryRequest = call.receive<CategoryRequest>()
+        val category = categoryRequest.toDomain()
 
         when(
             val result = useCases.insertCategory(category)
         ) {
-            is DomainResult.Success -> call.respond(HttpStatusCode.Created, category)
+            is DomainResult.Success -> call.respond(HttpStatusCode.Created, category.toResponse())
             is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
         }
     }
 
     put <CategoryResource.Id> { request ->
         val categoryId = CategoryId(request.id)
-        val updatedCategory = call.receive<Category>()
+        val categoryRequest = call.receive<CategoryRequest>()
+        val updatedCategory = categoryRequest.toDomain()
 
         when(
             val result = useCases.updateCategory(categoryId, updatedCategory)
         ) {
-            is DomainResult.Success -> call.respond(HttpStatusCode.OK, updatedCategory)
+            is DomainResult.Success -> call.respond(HttpStatusCode.OK, updatedCategory.toResponse())
             is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
         }
     }

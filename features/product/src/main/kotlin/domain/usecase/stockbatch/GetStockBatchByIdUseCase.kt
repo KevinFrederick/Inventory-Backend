@@ -3,8 +3,8 @@ package domain.usecase.stockbatch
 import domain.model.BatchId
 import domain.model.StockBatch
 import domain.repository.StockBatchRepository
-import domain.result.DomainResult
-import domain.result.ErrorType
+import result.DomainResult
+import result.ErrorType
 
 class GetStockBatchByIdUseCase (
     private val repository: StockBatchRepository
@@ -14,10 +14,12 @@ class GetStockBatchByIdUseCase (
             val result = repository.getBatchById(batchId)
         ) {
             is DomainResult.Success -> {
-                if (result.data == null) {
+                val batch = result.data
+
+                if (batch == null) {
                     DomainResult.Error("Batch not found", ErrorType.NOT_FOUND)
                 } else {
-                    DomainResult.Success(result.data)
+                    DomainResult.Success(batch)
                 }
             }
             is DomainResult.Error -> result

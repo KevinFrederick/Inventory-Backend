@@ -1,4 +1,4 @@
-package domain.result
+package result
 
 enum class ErrorType {
     CONFLICT,

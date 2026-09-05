@@ -3,8 +3,8 @@ package domain.usecase.category
 import domain.model.Category
 import domain.model.CategoryId
 import domain.repository.CategoryRepository
-import domain.result.DomainResult
-import domain.result.ErrorType
+import result.DomainResult
+import result.ErrorType
 
 class GetCategoryByIdUseCase (
     private val repository: CategoryRepository
@@ -14,11 +14,13 @@ class GetCategoryByIdUseCase (
             val result = repository.getCategoryById(categoryId)
         ) {
             is DomainResult.Success -> {
-                if (result.data == null) {
+                val category = result.data
+
+                if (category == null) {
                     DomainResult.Error("Category Not Found", ErrorType.NOT_FOUND)
                 }
                 else {
-                    DomainResult.Success(result.data)
+                    DomainResult.Success(category)
                 }
             }
             is DomainResult.Error -> result

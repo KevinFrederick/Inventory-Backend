@@ -23,5 +23,8 @@ rootProject.name = "inventory-backend"
 
 
 include(":app")
+include(":core:domain")
 include(":core:database")
+include(":core:storage")
 include(":features:product")
+

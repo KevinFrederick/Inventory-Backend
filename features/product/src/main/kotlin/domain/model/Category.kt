@@ -1,12 +1,8 @@
 package domain.model
 
-import kotlinx.serialization.Serializable
-
-@Serializable
 @JvmInline
 value class CategoryId(val value: String)
 
-@Serializable
 data class Category(
     val categoryId: CategoryId,
     val name: String,

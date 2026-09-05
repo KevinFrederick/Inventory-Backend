@@ -2,7 +2,7 @@ package domain.usecase.category
 
 import domain.model.CategoryId
 import domain.repository.CategoryRepository
-import domain.result.DomainResult
+import result.DomainResult
 
 class DeleteCategoryUseCase (
     private val repository: CategoryRepository,

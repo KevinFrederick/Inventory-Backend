@@ -14,6 +14,7 @@ application {
 
 dependencies {
     implementation(project(":core:database"))
+    implementation(project(":core:storage"))
     implementation(project(":features:product"))
 
     implementation(ktorLibs.serialization.kotlinx.json)

@@ -22,5 +22,6 @@ object StockBatchTable: Table("stock_batch") {
     val expirationDate = long("expiration_date").nullable()
     val price = double("price").default(0.0)
     val supplier = text("supplier").nullable()
+    val createdAt = long("created_at")
     val lastUpdated = long("last_updated")
 }
