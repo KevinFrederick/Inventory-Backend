@@ -2,6 +2,10 @@ services:
   postgres-db:
     image: postgres:17
     container_name: inventory-db
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/run/postgresql
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -10,10 +14,19 @@ services:
       - "127.0.0.1:5432:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   minio:
     image: minio/minio
     container_name: inventory-img-db
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /root/.minio
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASS}
@@ -27,7 +40,14 @@ services:
   ktor-backend:
     container_name: inventory-be
     build: .
+    read_only: true
+    tmpfs:
+      - /tmp
     environment:
+      MINIO_URL: ${MINIO_URL}
+      MINIO_PUBLIC_URL: ${MINIO_PUBLIC_URL}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASS: ${MINIO_ROOT_PASS}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASS: ${POSTGRES_PASS}
       POSTGRES_JDBC_URL: ${POSTGRES_JDBC_URL}

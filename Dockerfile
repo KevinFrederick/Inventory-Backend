@@ -7,6 +7,11 @@ RUN gradle :app:buildFatJar --no-daemon
 # Runner
 FROM eclipse-temurin:21-jre
 EXPOSE 8080
-RUN mkdir /app
-COPY --from=build /home/gradle/src/app/build/libs/*-all.jar /app/ktor-backend.jar
+
+RUN addgroup --system ktor && \
+    adduser --system --ingroup ktor ktoruser
+
+RUN mkdir /app && chown ktoruser:ktor /app
+COPY --chown=ktoruser:ktor --from=build /home/gradle/src/app/build/libs/*-all.jar /app/ktor-backend.jar
+USER ktoruser
 ENTRYPOINT ["java", "-jar", "/app/ktor-backend.jar"]

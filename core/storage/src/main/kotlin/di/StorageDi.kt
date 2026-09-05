@@ -19,7 +19,7 @@ val storageModule = module {
     single<ImageStorageService> {
         MinioImageStorageService(
             minioClient = get(),
-            publicBaseUrl = System.getenv("MINIO_URL") ?: "http://localhost:9000",
+            publicBaseUrl = System.getenv("MINIO_PUBLIC_URL") ?: "http://localhost:9000",
             bucketName = "product"
         )
     }

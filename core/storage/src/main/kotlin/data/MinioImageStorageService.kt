@@ -3,11 +3,12 @@ package data
 import result.DomainResult
 import result.ErrorType
 import domain.ImageStorageService
+import io.minio.BucketExistsArgs
+import io.minio.MakeBucketArgs
 import io.minio.MinioClient
 import io.minio.PutObjectArgs
 import io.minio.RemoveObjectArgs
 import java.io.ByteArrayInputStream
-import java.util.UUID
 
 class MinioImageStorageService(
     private val minioClient: MinioClient,
@@ -16,6 +17,15 @@ class MinioImageStorageService(
 ): ImageStorageService {
     override suspend fun saveImage(fileBytes: ByteArray, filename: String): DomainResult<String> {
         return try {
+            val found = minioClient.bucketExists(
+                BucketExistsArgs.builder()
+                    .bucket(bucketName)
+                    .build()
+            )
+            if (!found) {
+                minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build())
+            }
+
             val inputStream = ByteArrayInputStream(fileBytes)
 
             minioClient.putObject(
