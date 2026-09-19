@@ -6,6 +6,8 @@ group = "com.kevinfreyap"
 version = "unspecified"
 
 dependencies {
+    implementation(project(":core:domain"))
+
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.core)
 
