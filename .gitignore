@@ -30,6 +30,7 @@ out/
 local.properties
 application-local.conf
 *secrets*.properties
+secrets/
 
 # OS specific files
 .DS_Store
