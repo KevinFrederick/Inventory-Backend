@@ -9,6 +9,8 @@ import result.DomainResult
 import domain.usecase.category.CategoryUseCases
 import io.ktor.http.HttpStatusCode
 import io.ktor.resources.Resource
+import io.ktor.server.plugins.ratelimit.RateLimitName
+import io.ktor.server.plugins.ratelimit.rateLimit
 import io.ktor.server.request.receive
 import io.ktor.server.resources.delete
 import io.ktor.server.resources.get
@@ -50,28 +52,32 @@ fun Route.categoryRoutes() {
         }
     }
 
-    post <CategoryResource> {
-        val categoryRequest = call.receive<CategoryRequest>()
-        val category = categoryRequest.toDomain()
+    rateLimit (RateLimitName("upload_limit")) {
+        post <CategoryResource> {
+            val categoryRequest = call.receive<CategoryRequest>()
+            val category = categoryRequest.toDomain()
 
-        when(
-            val result = useCases.insertCategory(category)
-        ) {
-            is DomainResult.Success -> call.respond(HttpStatusCode.Created, category.toResponse())
-            is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
+            when(
+                val result = useCases.insertCategory(category)
+            ) {
+                is DomainResult.Success -> call.respond(HttpStatusCode.Created, category.toResponse())
+                is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
+            }
         }
     }
 
-    put <CategoryResource.Id> { request ->
-        val categoryId = CategoryId(request.id)
-        val categoryRequest = call.receive<CategoryRequest>()
-        val updatedCategory = categoryRequest.toDomain()
+    rateLimit (RateLimitName("upload_limit")) {
+        put <CategoryResource.Id> { request ->
+            val categoryId = CategoryId(request.id)
+            val categoryRequest = call.receive<CategoryRequest>()
+            val updatedCategory = categoryRequest.toDomain()
 
-        when(
-            val result = useCases.updateCategory(categoryId, updatedCategory)
-        ) {
-            is DomainResult.Success -> call.respond(HttpStatusCode.OK, updatedCategory.toResponse())
-            is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
+            when(
+                val result = useCases.updateCategory(categoryId, updatedCategory)
+            ) {
+                is DomainResult.Success -> call.respond(HttpStatusCode.OK, updatedCategory.toResponse())
+                is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
+            }
         }
     }
 

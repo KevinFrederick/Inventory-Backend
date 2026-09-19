@@ -6,6 +6,7 @@ group = "com.kevinfreyap"
 version = "unspecified"
 
 dependencies {
+    api(ktorLibs.server.rateLimit)
     testImplementation(kotlin("test"))
 }
 

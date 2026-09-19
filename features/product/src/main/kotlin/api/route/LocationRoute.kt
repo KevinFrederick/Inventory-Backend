@@ -9,6 +9,8 @@ import result.DomainResult
 import domain.usecase.location.LocationUseCases
 import io.ktor.http.HttpStatusCode
 import io.ktor.resources.Resource
+import io.ktor.server.plugins.ratelimit.RateLimitName
+import io.ktor.server.plugins.ratelimit.rateLimit
 import io.ktor.server.request.receive
 import io.ktor.server.resources.delete
 import io.ktor.server.routing.Route
@@ -50,28 +52,32 @@ fun Route.locationRoutes() {
         }
     }
 
-    post <LocationResource> {
-        val locationRequest = call.receive<LocationRequest>()
-        val location = locationRequest.toDomain()
+    rateLimit (RateLimitName("upload_limit")) {
+        post <LocationResource> {
+            val locationRequest = call.receive<LocationRequest>()
+            val location = locationRequest.toDomain()
 
-        when(
-            val result = useCases.insertLocation(location)
-        ) {
-            is DomainResult.Success -> call.respond(HttpStatusCode.Created, location.toResponse())
-            is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
+            when(
+                val result = useCases.insertLocation(location)
+            ) {
+                is DomainResult.Success -> call.respond(HttpStatusCode.Created, location.toResponse())
+                is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
+            }
         }
     }
 
-    put <LocationResource.Id> { request ->
-        val locationId = LocationId(request.id)
-        val locationRequest = call.receive<LocationRequest>()
-        val updatedLocation = locationRequest.toDomain()
+    rateLimit (RateLimitName("upload_limit")) {
+        put <LocationResource.Id> { request ->
+            val locationId = LocationId(request.id)
+            val locationRequest = call.receive<LocationRequest>()
+            val updatedLocation = locationRequest.toDomain()
 
-        when (
-            val result = useCases.updateLocation(locationId, updatedLocation)
-        ) {
-            is DomainResult.Success -> call.respond(HttpStatusCode.OK, updatedLocation.toResponse())
-            is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
+            when (
+                val result = useCases.updateLocation(locationId, updatedLocation)
+            ) {
+                is DomainResult.Success -> call.respond(HttpStatusCode.OK, updatedLocation.toResponse())
+                is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
+            }
         }
     }
 

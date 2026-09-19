@@ -9,6 +9,8 @@ import result.DomainResult
 import domain.usecase.stockbatch.StockBatchUseCases
 import io.ktor.http.HttpStatusCode
 import io.ktor.resources.Resource
+import io.ktor.server.plugins.ratelimit.RateLimitName
+import io.ktor.server.plugins.ratelimit.rateLimit
 import io.ktor.server.request.receive
 import io.ktor.server.resources.delete
 import io.ktor.server.resources.get
@@ -41,28 +43,32 @@ fun Route.stockBatchRoutes() {
         }
     }
 
-    post < StockBatchResource> {
-        val batchRequest = call.receive<StockBatchRequest>()
-        val batchParams = batchRequest.toDomainParams()
+    rateLimit (RateLimitName("upload_limit")) {
+        post < StockBatchResource> {
+            val batchRequest = call.receive<StockBatchRequest>()
+            val batchParams = batchRequest.toDomainParams()
 
-        when(
-            val result = useCases.insertBatch(batchParams)
-        ) {
-            is DomainResult.Success -> call.respond(HttpStatusCode.Created, result.data.toResponse())
-            is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
+            when(
+                val result = useCases.insertBatch(batchParams)
+            ) {
+                is DomainResult.Success -> call.respond(HttpStatusCode.Created, result.data.toResponse())
+                is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
+            }
         }
     }
 
-    put<StockBatchResource.Id> { request ->
-        val batchId = BatchId(request.id)
-        val batchRequest = call.receive<StockBatchRequest>()
-        val batchParams = batchRequest.toDomainParams()
+    rateLimit (RateLimitName("upload_limit")) {
+        put<StockBatchResource.Id> { request ->
+            val batchId = BatchId(request.id)
+            val batchRequest = call.receive<StockBatchRequest>()
+            val batchParams = batchRequest.toDomainParams()
 
-        when(
-            val result = useCases.updateBatch(batchId, batchParams)
-        ) {
-            is DomainResult.Success -> call.respond(HttpStatusCode.OK, result.data.toResponse())
-            is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
+            when(
+                val result = useCases.updateBatch(batchId, batchParams)
+            ) {
+                is DomainResult.Success -> call.respond(HttpStatusCode.OK, result.data.toResponse())
+                is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
+            }
         }
     }
 

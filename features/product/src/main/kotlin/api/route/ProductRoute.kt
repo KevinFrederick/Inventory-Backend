@@ -10,6 +10,8 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.PartData
 import io.ktor.http.content.forEachPart
 import io.ktor.resources.Resource
+import io.ktor.server.plugins.ratelimit.RateLimitName
+import io.ktor.server.plugins.ratelimit.rateLimit
 import io.ktor.server.request.receive
 import io.ktor.server.request.receiveMultipart
 import io.ktor.server.resources.delete
@@ -59,59 +61,65 @@ fun Route.productRoutes() {
         }
     }
 
-    post<ProductResource> {
-        val productRequest = call.receive<ProductRequest>()
-        val productParams = productRequest.toDomainParams()
+    rateLimit (RateLimitName("upload_limit")) {
+        post<ProductResource> {
+            val productRequest = call.receive<ProductRequest>()
+            val productParams = productRequest.toDomainParams()
 
-        when (
-            val result = useCases.insertProduct(productParams)
-        ) {
-            is DomainResult.Success -> call.respond(HttpStatusCode.Created, result.data.toResponse())
-            is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
+            when (
+                val result = useCases.insertProduct(productParams)
+            ) {
+                is DomainResult.Success -> call.respond(HttpStatusCode.Created, result.data.toResponse())
+                is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
+            }
         }
     }
 
-    put<ProductResource.Id> { request ->
-        val productId = ProductId(request.id)
-        val productRequest = call.receive<ProductRequest>()
-        val productParams = productRequest.toDomainParams()
+    rateLimit (RateLimitName("upload_limit")) {
+        put<ProductResource.Id> { request ->
+            val productId = ProductId(request.id)
+            val productRequest = call.receive<ProductRequest>()
+            val productParams = productRequest.toDomainParams()
 
-        when (
-            val result = useCases.updateProduct(productId, productParams)
-        ) {
-            is DomainResult.Success -> call.respond(HttpStatusCode.OK, result.data.toResponse())
-            is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
+            when (
+                val result = useCases.updateProduct(productId, productParams)
+            ) {
+                is DomainResult.Success -> call.respond(HttpStatusCode.OK, result.data.toResponse())
+                is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
+            }
         }
     }
 
-    put<ProductResource.Id.ProductImage> { request ->
-        val productId = ProductId(request.parent.id)
+    rateLimit (RateLimitName("upload_limit")) {
+        put<ProductResource.Id.ProductImage> { request ->
+            val productId = ProductId(request.parent.id)
 
-        var fileBytes: ByteArray? = null
+            var fileBytes: ByteArray? = null
 
-        val multipartData = call.receiveMultipart()
-        multipartData.forEachPart { partData ->
-            when (partData) {
-                is PartData.FileItem -> {
-                    fileBytes = partData.provider().toByteArray()
+            val multipartData = call.receiveMultipart()
+            multipartData.forEachPart { partData ->
+                when (partData) {
+                    is PartData.FileItem -> {
+                        fileBytes = partData.provider().toByteArray()
+                    }
+                    else -> {}
                 }
-                else -> {}
+
+                partData.release()
             }
 
-            partData.release()
-        }
+            val finalBytes = fileBytes
+            if (finalBytes == null) {
+                call.respond(HttpStatusCode.BadRequest, "No image file provided")
+                return@put
+            }
 
-        val finalBytes = fileBytes
-        if (finalBytes == null) {
-            call.respond(HttpStatusCode.BadRequest, "No image file provided")
-            return@put
-        }
-
-        when(
-            val result = useCases.uploadProductImage(productId, finalBytes)
-        ) {
-            is DomainResult.Success -> call.respond(HttpStatusCode.OK, result.data)
-            is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
+            when(
+                val result = useCases.uploadProductImage(productId, finalBytes)
+            ) {
+                is DomainResult.Success -> call.respond(HttpStatusCode.OK, result.data)
+                is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
+            }
         }
     }
 
