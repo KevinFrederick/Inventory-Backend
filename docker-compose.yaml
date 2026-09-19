@@ -9,11 +9,13 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASS}
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_pass
     ports:
       - "127.0.0.1:5432:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
+    secrets:
+      - db_pass
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
       interval: 10s
@@ -29,13 +31,15 @@ services:
       - /root/.minio
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASS}
+      MINIO_ROOT_PASSWORD_FILE: /run/secrets/minio_pass
     command: server /data --console-address ":9001"
     ports:
       - "127.0.0.1:9000:9000"
       - "127.0.0.1:9001:9001"
     volumes:
       - minio_data:/data
+    secrets:
+      - minio_pass
 
   ktor-backend:
     container_name: inventory-be
@@ -47,16 +51,25 @@ services:
       MINIO_URL: ${MINIO_URL}
       MINIO_PUBLIC_URL: ${MINIO_PUBLIC_URL}
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASS: ${MINIO_ROOT_PASS}
       POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASS: ${POSTGRES_PASS}
       POSTGRES_JDBC_URL: ${POSTGRES_JDBC_URL}
     ports:
       - "127.0.0.1:8081:8080"
     depends_on:
-      - postgres-db
-      - minio
+      postgres-db:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    secrets:
+      - db_pass
+      - minio_pass
 
 volumes:
   pg_data:
   minio_data:
+
+secrets:
+  db_pass:
+    file: ./secrets/db_pass.txt
+  minio_pass:
+    file: ./secrets/minio_pass.txt

@@ -4,6 +4,7 @@ import data.MinioImageStorageService
 import domain.ImageStorageService
 import io.minio.MinioClient
 import org.koin.dsl.module
+import util.getSecret
 
 val storageModule = module {
     single {
@@ -11,7 +12,7 @@ val storageModule = module {
             .endpoint(System.getenv("MINIO_URL") ?: "http://localhost:9000" )
             .credentials(
                 System.getenv("MINIO_ROOT_USER") ?: "admin",
-                System.getenv("MINIO_ROOT_PASS") ?: "password",
+                getSecret("minio_pass","MINIO_ROOT_PASS"),
             )
             .build()
     }
