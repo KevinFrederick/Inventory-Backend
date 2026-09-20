@@ -2,7 +2,9 @@ package data.repository
 
 import DatabaseFactory.dbQuery
 import data.local.table.CategoryTable
+import data.local.table.DeletedTable
 import data.mapper.toCategory
+import data.util.EntityType
 import domain.model.Category
 import domain.model.CategoryId
 import domain.repository.CategoryRepository
@@ -57,6 +59,7 @@ class CategoryRepositoryImpl: CategoryRepository {
                 it[description] = category.description
                 it[createdAt] = category.createdAt
                 it[lastUpdated] = category.lastUpdated
+                it[serverUpdatedAt] = System.currentTimeMillis()
             }
 
             DomainResult.Success(Unit)
@@ -78,6 +81,7 @@ class CategoryRepositoryImpl: CategoryRepository {
                 it[name] = category.name
                 it[description] = category.description
                 it[lastUpdated] = category.lastUpdated
+                it[serverUpdatedAt] = System.currentTimeMillis()
             }
 
             if (updatedRowsCount == 0) return@dbQuery DomainResult.Error("Category Not Found", ErrorType.NOT_FOUND)
@@ -100,6 +104,12 @@ class CategoryRepositoryImpl: CategoryRepository {
             val deletedRowsCount = CategoryTable.deleteWhere { CategoryTable.categoryId eq categoryId.value }
 
             if (deletedRowsCount == 0) return@dbQuery DomainResult.Error("Category Not Found", ErrorType.NOT_FOUND)
+
+            DeletedTable.insert {
+                it[entityId] = categoryId.value
+                it[entityType] = EntityType.CATEGORY.name
+                it[deletedAt] = System.currentTimeMillis()
+            }
 
             DomainResult.Success(Unit)
         } catch (e: Exception) {

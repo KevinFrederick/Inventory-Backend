@@ -2,11 +2,13 @@ package data.repository
 
 import DatabaseFactory.dbQuery
 import data.local.table.CategoryTable
+import data.local.table.DeletedTable
 import data.local.table.LocationTable
 import data.local.table.ProductTable
 import data.local.table.StockBatchTable
 import data.mapper.toProduct
 import data.mapper.toStockBatch
+import data.util.EntityType
 import domain.model.Product
 import domain.model.ProductId
 import domain.repository.ProductRepository
@@ -80,6 +82,8 @@ class ProductRepositoryImpl: ProductRepository {
 
     override suspend fun insertProduct(product: Product): DomainResult<Product> = dbQuery {
         try {
+            val timeStamp = System.currentTimeMillis()
+
             val insertStatement = ProductTable.insert {
                 it[productId] = product.productId.value
                 it[categoryId] = product.category.categoryId.value
@@ -91,6 +95,7 @@ class ProductRepositoryImpl: ProductRepository {
                 it[minimumQuantity] = product.minimumQuantity
                 it[createdAt] = product.createdAt
                 it[lastUpdated] = product.lastUpdated
+                it[serverUpdatedAt] = timeStamp
             }
 
             val isProductInserted = insertStatement.insertedCount > 0
@@ -105,6 +110,7 @@ class ProductRepositoryImpl: ProductRepository {
                     this[StockBatchTable.expirationDate] = batch.expirationDate
                     this[StockBatchTable.supplier] = batch.supplier
                     this[StockBatchTable.lastUpdated] = batch.lastUpdated
+                    this[StockBatchTable.serverUpdatedAt] = timeStamp
                 }
             }
 
@@ -134,6 +140,7 @@ class ProductRepositoryImpl: ProductRepository {
                 it[imageUri] = product.imageUri
                 it[minimumQuantity] = product.minimumQuantity
                 it[lastUpdated] = product.lastUpdated
+                it[serverUpdatedAt] = System.currentTimeMillis()
             }
 
             if (updatedRows == 0) {
@@ -164,6 +171,7 @@ class ProductRepositoryImpl: ProductRepository {
             val updatedRows = ProductTable.update ( { ProductTable.productId eq productId.value }) {
                 it[imageUri] = imageUriPath
                 it[lastUpdated] = updatedAt
+                it[serverUpdatedAt] = System.currentTimeMillis()
             }
 
             if (updatedRows == 0) return@dbQuery DomainResult.Error("Product not found", ErrorType.NOT_FOUND)
@@ -182,6 +190,12 @@ class ProductRepositoryImpl: ProductRepository {
                 return@dbQuery DomainResult.Error("Product Not Found", ErrorType.NOT_FOUND)
             }
 
+            DeletedTable.insert {
+                it[entityId] = productId.value
+                it[entityType] = EntityType.PRODUCT.name
+                it[deletedAt] = System.currentTimeMillis()
+            }
+
             DomainResult.Success(Unit)
         } catch (e: Exception) {
             DomainResult.Error(e.message ?: "Unknown error", ErrorType.UNKNOWN)
@@ -196,6 +210,7 @@ class ProductRepositoryImpl: ProductRepository {
             val updatedRows = ProductTable.update({ ProductTable.productId eq productId.value }) {
                 it[imageUri] = null
                 it[lastUpdated] = updatedAt
+                it[serverUpdatedAt] = System.currentTimeMillis()
             }
 
             if (updatedRows == 0) return@dbQuery DomainResult.Error("Product Not Found", ErrorType.NOT_FOUND)

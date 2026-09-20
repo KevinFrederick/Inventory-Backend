@@ -1,10 +1,12 @@
 package data.repository
 
 import DatabaseFactory.dbQuery
+import data.local.table.DeletedTable
 import data.local.table.LocationTable
 import data.local.table.ProductTable
 import data.local.table.StockBatchTable
 import data.mapper.toStockBatch
+import data.util.EntityType
 import domain.model.BatchId
 import domain.model.StockBatch
 import domain.repository.StockBatchRepository
@@ -38,6 +40,8 @@ class StockBatchRepositoryImpl: StockBatchRepository {
 
     override suspend fun insertBatch(batch: StockBatch): DomainResult<StockBatch> = dbQuery {
         try {
+            val timeStamp = System.currentTimeMillis()
+
             val insertStatement = StockBatchTable.insert {
                 it[batchId] = batch.batchId.value
                 it[productId] = batch.productId.value
@@ -48,6 +52,7 @@ class StockBatchRepositoryImpl: StockBatchRepository {
                 it[supplier] = batch.supplier
                 it[createdAt] = batch.createdAt
                 it[lastUpdated] = batch.lastUpdated
+                it[serverUpdatedAt] = timeStamp
             }
 
             val isBatchInserted = insertStatement.insertedCount > 0
@@ -55,6 +60,7 @@ class StockBatchRepositoryImpl: StockBatchRepository {
             if (isBatchInserted) {
                 ProductTable.update({ ProductTable.productId eq batch.productId.value}) {
                     it[lastUpdated] = batch.lastUpdated
+                    it[serverUpdatedAt] = timeStamp
                 }
             }
 
@@ -75,6 +81,8 @@ class StockBatchRepositoryImpl: StockBatchRepository {
 
     override suspend fun updateBatch(batch: StockBatch): DomainResult<StockBatch> = dbQuery {
         try {
+            val timeStamp = System.currentTimeMillis()
+
             val updatedRowsCount = StockBatchTable.update ({ StockBatchTable.batchId eq batch.batchId.value}) {
                 it[locationId] = batch.location.locationId.value
                 it[quantity] = batch.quantity
@@ -82,12 +90,14 @@ class StockBatchRepositoryImpl: StockBatchRepository {
                 it[expirationDate] = batch.expirationDate
                 it[supplier] = batch.supplier
                 it[lastUpdated] = batch.lastUpdated
+                it[serverUpdatedAt] = timeStamp
             }
 
             if (updatedRowsCount == 0) return@dbQuery DomainResult.Error("Batch not found", ErrorType.NOT_FOUND)
 
             ProductTable.update({ ProductTable.productId eq batch.productId.value}) {
                 it[lastUpdated] = batch.lastUpdated
+                it[serverUpdatedAt] = timeStamp
             }
 
             DomainResult.Success(batch)
@@ -107,6 +117,8 @@ class StockBatchRepositoryImpl: StockBatchRepository {
 
     override suspend fun deleteBatch(batchId: BatchId, deletedTimestamp: Long): DomainResult<Unit> = dbQuery {
         try {
+            val timeStamp = System.currentTimeMillis()
+
             val productId = StockBatchTable
                 .selectAll()
                 .where { StockBatchTable.batchId eq batchId.value }
@@ -122,6 +134,13 @@ class StockBatchRepositoryImpl: StockBatchRepository {
             if (isBatchDeleted) {
                 ProductTable.update({ ProductTable.productId eq productId}) {
                     it[lastUpdated] = deletedTimestamp
+                    it[serverUpdatedAt] = timeStamp
+                }
+
+                DeletedTable.insert {
+                    it[entityId] = batchId.value
+                    it[entityType] = EntityType.BATCH.name
+                    it[deletedAt] = timeStamp
                 }
             }
 
