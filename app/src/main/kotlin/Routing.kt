@@ -8,6 +8,7 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import api.route.productRoutes
 import api.route.stockBatchRoutes
+import api.route.syncRoute
 
 fun Application.configureRouting() {
     routing {
@@ -19,5 +20,6 @@ fun Application.configureRouting() {
         categoryRoutes()
         locationRoutes()
         stockBatchRoutes()
+        syncRoute()
     }
 }

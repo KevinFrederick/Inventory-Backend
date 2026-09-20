@@ -1,8 +1,10 @@
 package data.repository
 
 import DatabaseFactory.dbQuery
+import data.local.table.DeletedTable
 import data.local.table.LocationTable
 import data.mapper.toLocation
+import data.util.EntityType
 import domain.model.Location
 import domain.model.LocationId
 import domain.repository.LocationRepository
@@ -76,6 +78,7 @@ class LocationRepositoryImpl: LocationRepository {
                 it[locationBarcode] = location.locationBarcode
                 it[createdAt] = location.createdAt
                 it[lastUpdated] = location.lastUpdated
+                it[serverUpdatedAt] = System.currentTimeMillis()
             }
 
             DomainResult.Success(Unit)
@@ -98,6 +101,7 @@ class LocationRepositoryImpl: LocationRepository {
                 it[description] = location.description
                 it[locationBarcode] = location.locationBarcode
                 it[lastUpdated] = location.lastUpdated
+                it[serverUpdatedAt] = System.currentTimeMillis()
             }
 
             if (updatedRowsCount == 0) return@dbQuery DomainResult.Error("Location not found", ErrorType.NOT_FOUND)
@@ -120,6 +124,12 @@ class LocationRepositoryImpl: LocationRepository {
             val deletedRowsCount = LocationTable.deleteWhere { LocationTable.locationId eq locationId.value }
 
             if (deletedRowsCount == 0) return@dbQuery DomainResult.Error("Location not found", ErrorType.NOT_FOUND)
+
+            DeletedTable.insert {
+                it[entityId] = locationId.value
+                it[entityType] = EntityType.LOCATION.name
+                it[deletedAt] = System.currentTimeMillis()
+            }
 
             DomainResult.Success(Unit)
         } catch (e: Exception) {

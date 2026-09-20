@@ -20,6 +20,7 @@ object ProductTable: Table("product") {
     val minimumQuantity = integer("minimum_quantity").default(0)
     val createdAt = long("created_at")
     val lastUpdated = long("last_updated")
+    val serverUpdatedAt = long("server_updated_at")
 
     override val primaryKey: PrimaryKey = PrimaryKey(productId)
 }

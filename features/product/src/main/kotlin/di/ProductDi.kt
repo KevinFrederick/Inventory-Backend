@@ -4,10 +4,12 @@ import data.repository.CategoryRepositoryImpl
 import data.repository.LocationRepositoryImpl
 import data.repository.ProductRepositoryImpl
 import data.repository.StockBatchRepositoryImpl
+import data.repository.SyncRepositoryImpl
 import domain.repository.CategoryRepository
 import domain.repository.LocationRepository
 import domain.repository.ProductRepository
 import domain.repository.StockBatchRepository
+import domain.repository.SyncRepository
 import domain.usecase.category.CategoryUseCases
 import domain.usecase.category.DeleteCategoryUseCase
 import domain.usecase.category.GetAllCategoryUseCase
@@ -34,6 +36,9 @@ import domain.usecase.stockbatch.InsertStockBatchUseCase
 import domain.usecase.util.StockBatchAssembler
 import domain.usecase.stockbatch.StockBatchUseCases
 import domain.usecase.stockbatch.UpdateStockBatchUseCase
+import domain.usecase.sync.SyncPullUseCase
+import domain.usecase.sync.SyncPushUseCase
+import domain.usecase.sync.SyncUseCase
 import org.koin.dsl.module
 
 val productModule = module {
@@ -42,6 +47,7 @@ val productModule = module {
     single<CategoryRepository> { CategoryRepositoryImpl() }
     single<LocationRepository> { LocationRepositoryImpl() }
     single<StockBatchRepository> { StockBatchRepositoryImpl() }
+    single<SyncRepository> { SyncRepositoryImpl() }
 
     //// Domain Layer (UseCases)
     // Assembler
@@ -113,4 +119,12 @@ val productModule = module {
         )
     }
 
+    factory { SyncPushUseCase(get()) }
+    factory { SyncPullUseCase(get()) }
+    factory {
+        SyncUseCase(
+            syncPull = get(),
+            syncPush = get()
+        )
+    }
 }

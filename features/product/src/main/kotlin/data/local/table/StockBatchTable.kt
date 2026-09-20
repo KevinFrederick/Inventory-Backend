@@ -24,4 +24,7 @@ object StockBatchTable: Table("stock_batch") {
     val supplier = text("supplier").nullable()
     val createdAt = long("created_at")
     val lastUpdated = long("last_updated")
+    val serverUpdatedAt = long("server_updated_at")
+
+    override val primaryKey: PrimaryKey = PrimaryKey(batchId)
 }
