@@ -24,6 +24,8 @@ dependencies {
     implementation(ktorLibs.server.netty)
     implementation(ktorLibs.server.rateLimit)
     implementation(ktorLibs.server.forwardedHeader)
+    implementation(ktorLibs.server.requestValidation)
+    implementation(ktorLibs.server.statusPages)
     implementation(libs.logback.classic)
 
     implementation(platform(libs.koin.bom))
