@@ -15,6 +15,7 @@ dependencies {
     implementation(libs.koin.ktor)
 
     implementation(ktorLibs.server.resources)
+    implementation(ktorLibs.server.requestValidation)
     implementation(libs.kotlinx.serialization)
 
     testImplementation(kotlin("test"))

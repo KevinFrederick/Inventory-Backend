@@ -22,6 +22,7 @@ fun Application.module() {
 
     configureProxySupport()
     configureRateLimit()
+    configureValidation()
 
     configureRouting()
 }
