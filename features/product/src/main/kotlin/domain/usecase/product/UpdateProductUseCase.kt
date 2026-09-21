@@ -6,6 +6,7 @@ import domain.model.ProductParams
 import domain.repository.CategoryRepository
 import domain.repository.ProductRepository
 import domain.usecase.util.StockBatchAssembler
+import domain.validation.ProductValidator
 import result.DomainResult
 import result.ErrorType
 
@@ -13,6 +14,7 @@ class UpdateProductUseCase (
     private val productRepository: ProductRepository,
     private val categoryRepository: CategoryRepository,
     private val stockBatchAssembler: StockBatchAssembler,
+    private val productValidator: ProductValidator,
 ) {
     suspend operator fun invoke(
         productId: ProductId,
@@ -42,6 +44,13 @@ class UpdateProductUseCase (
                 createdAt = productParams.createdAt,
                 lastUpdated = productParams.lastUpdated
             )
+
+            when(
+                val validationResult = productValidator.validateProduct(product)
+            ) {
+                is DomainResult.Error -> return validationResult
+                is DomainResult.Success -> {}
+            }
 
             productRepository.updateProduct(product)
         }

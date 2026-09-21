@@ -1,15 +1,17 @@
 package api.dto.sync
 
+import api.dto.request.CategoryRequest
+import api.dto.request.LocationRequest
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class SyncPayloadDto(
-    val createdCategories: List<SyncCategoryDto> = emptyList(),
-    val updatedCategories: List<SyncCategoryDto> = emptyList(),
+    val createdCategories: List<CategoryRequest> = emptyList(),
+    val updatedCategories: List<CategoryRequest> = emptyList(),
     val deletedCategories: List<String> = emptyList(),
 
-    val createdLocations: List<SyncLocationDto> = emptyList(),
-    val updatedLocations: List<SyncLocationDto> = emptyList(),
+    val createdLocations: List<LocationRequest> = emptyList(),
+    val updatedLocations: List<LocationRequest> = emptyList(),
     val deletedLocations: List<String> = emptyList(),
 
     val createdProduct: List<SyncProductDto> = emptyList(),

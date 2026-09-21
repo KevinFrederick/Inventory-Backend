@@ -16,7 +16,7 @@ fun StockBatchRequest.toDomainParams(): StockBatchParams =
         quantity = this.quantity,
         price = this.price,
         expirationDate = this.expirationDate,
-        supplier = this.supplier,
+        supplier = this.supplier?.trim(),
         createdAt = this.createdAt,
         lastUpdated = this.lastUpdated
     )

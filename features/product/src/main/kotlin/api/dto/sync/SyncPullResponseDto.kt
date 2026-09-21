@@ -1,11 +1,13 @@
 package api.dto.sync
 
+import api.dto.response.CategoryResponse
+import api.dto.response.LocationResponse
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class SyncPullResponseDto(
-    val categories: List<SyncCategoryDto>,
-    val locations: List<SyncLocationDto>,
+    val categories: List<CategoryResponse>,
+    val locations: List<LocationResponse>,
     val products: List<SyncProductDto>,
     val batches: List<SyncStockBatchDto>,
 

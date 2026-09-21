@@ -1,17 +1,19 @@
 package domain.model.sync
 
 import domain.model.BatchId
+import domain.model.Category
 import domain.model.CategoryId
+import domain.model.Location
 import domain.model.LocationId
 import domain.model.ProductId
 
 data class SyncPayload (
-    val createdCategories: List<SyncCategory>,
-    val updatedCategories: List<SyncCategory>,
+    val createdCategories: List<Category>,
+    val updatedCategories: List<Category>,
     val deletedCategories: List<CategoryId>,
 
-    val createdLocations: List<SyncLocation>,
-    val updatedLocations: List<SyncLocation>,
+    val createdLocations: List<Location>,
+    val updatedLocations: List<Location>,
     val deletedLocations: List<LocationId>,
 
     val createdProduct: List<SyncProduct>,

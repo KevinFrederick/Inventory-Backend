@@ -6,8 +6,8 @@ import data.local.table.DeletedTable
 import data.local.table.LocationTable
 import data.local.table.ProductTable
 import data.local.table.StockBatchTable
-import data.mapper.toSyncCategory
-import data.mapper.toSyncLocation
+import data.mapper.toCategory
+import data.mapper.toLocation
 import data.mapper.toSyncProduct
 import data.mapper.toSyncStockBatch
 import data.util.EntityType
@@ -193,12 +193,12 @@ class SyncRepositoryImpl: SyncRepository {
                 val updatedCategories = CategoryTable
                     .selectAll()
                     .where { CategoryTable.serverUpdatedAt greater updatedAfter }
-                    .map { it.toSyncCategory() }
+                    .map { it.toCategory() }
 
                 val updatedLocations = LocationTable
                     .selectAll()
                     .where { LocationTable.serverUpdatedAt greater updatedAfter }
-                    .map { it.toSyncLocation() }
+                    .map { it.toLocation() }
 
                 val updatedProduct = ProductTable
                     .selectAll()

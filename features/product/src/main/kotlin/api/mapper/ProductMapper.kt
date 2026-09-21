@@ -6,16 +6,17 @@ import domain.model.CategoryId
 import domain.model.Product
 import domain.model.ProductId
 import domain.model.ProductParams
+import util.cleanInlineSpaces
 
 fun ProductRequest.toDomainParams(): ProductParams =
     ProductParams(
         productId = ProductId(this.productId),
         categoryId = CategoryId(this.categoryId),
-        name = this.name,
-        description = this.description,
-        barcode = this.barcode,
-        sku = this.sku,
-        imageUri = this.imageUri,
+        name = this.name.cleanInlineSpaces(),
+        description = this.description?.cleanInlineSpaces(),
+        barcode = this.barcode?.trim(),
+        sku = this.sku?.trim()?.uppercase(),
+        imageUri = this.imageUri?.trim(),
         minimumQuantity = this.minimumQuantity,
         batches = this.batches.map { it.toDomainParams() },
         createdAt = this.createdAt,
