@@ -39,6 +39,11 @@ import domain.usecase.stockbatch.UpdateStockBatchUseCase
 import domain.usecase.sync.SyncPullUseCase
 import domain.usecase.sync.SyncPushUseCase
 import domain.usecase.sync.SyncUseCase
+import domain.validation.CategoryValidator
+import domain.validation.LocationValidator
+import domain.validation.ProductValidator
+import domain.validation.StockBatchValidator
+import domain.validation.ValidationRules
 import org.koin.dsl.module
 
 val productModule = module {
@@ -56,8 +61,8 @@ val productModule = module {
     // Product Use Cases
     factory { GetAllProductUseCase(get()) }
     factory { GetProductByIdUseCase(get()) }
-    factory { InsertProductUseCase(get(), get(), get()) }
-    factory { UpdateProductUseCase(get(), get(), get()) }
+    factory { InsertProductUseCase(get(), get(), get(), get()) }
+    factory { UpdateProductUseCase(get(), get(), get(), get()) }
     factory { UploadProductImageUseCase(get(), get())}
     factory { DeleteProductUseCase(get()) }
     factory { DeleteProductImageUseCase(get(), get()) }
@@ -76,8 +81,8 @@ val productModule = module {
     // Category Use Cases
     factory { GetAllCategoryUseCase(get()) }
     factory { GetCategoryByIdUseCase(get()) }
-    factory { InsertCategoryUseCase(get()) }
-    factory { UpdateCategoryUseCase(get()) }
+    factory { InsertCategoryUseCase(get(), get()) }
+    factory { UpdateCategoryUseCase(get(), get()) }
     factory { DeleteCategoryUseCase(get()) }
     factory {
         CategoryUseCases(
@@ -92,8 +97,8 @@ val productModule = module {
     // Location Use Cases
     factory { GetAllLocationUseCase(get()) }
     factory { GetLocationByIdUseCase(get()) }
-    factory { InsertLocationUseCase(get()) }
-    factory { UpdateLocationUseCase(get()) }
+    factory { InsertLocationUseCase(get(), get()) }
+    factory { UpdateLocationUseCase(get(), get()) }
     factory { DeleteLocationUseCase(get()) }
     factory {
         LocationUseCases(
@@ -107,8 +112,8 @@ val productModule = module {
 
     // Stock Batch Use Cases
     factory { GetStockBatchByIdUseCase(get()) }
-    factory { InsertStockBatchUseCase(get(), get()) }
-    factory { UpdateStockBatchUseCase(get(), get()) }
+    factory { InsertStockBatchUseCase(get(), get(), get()) }
+    factory { UpdateStockBatchUseCase(get(), get(), get()) }
     factory { DeleteStockBatchUseCase(get()) }
     factory {
         StockBatchUseCases(
@@ -119,7 +124,7 @@ val productModule = module {
         )
     }
 
-    factory { SyncPushUseCase(get()) }
+    factory { SyncPushUseCase(get(), get(), get(), get(), get()) }
     factory { SyncPullUseCase(get()) }
     factory {
         SyncUseCase(
@@ -127,4 +132,11 @@ val productModule = module {
             syncPush = get()
         )
     }
+
+    // Validator
+    single<ValidationRules> { ValidationRules() }
+    factory { LocationValidator(get()) }
+    factory { CategoryValidator(get()) }
+    factory { StockBatchValidator(get(), get()) }
+    factory { ProductValidator(get(), get(), get()) }
 }

@@ -7,11 +7,11 @@ data class SyncProduct (
     val productId: ProductId,
     val categoryId: CategoryId,
     val name: String,
-    val description: String? = null,
-    val barcode: String? = null,
-    val sku: String? = null,
-    val imageUri: String? = null,
-    val minimumQuantity: Int = 0,
+    val description: String?,
+    val barcode: String?,
+    val sku: String?,
+    val imageUri: String?,
+    val minimumQuantity: Int,
     val createdAt: Long,
     val lastUpdated: Long
 )

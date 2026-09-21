@@ -1,7 +1,5 @@
 package api.validation
 
-import api.dto.sync.SyncCategoryDto
-import api.dto.sync.SyncLocationDto
 import api.dto.sync.SyncPayloadDto
 import api.dto.sync.SyncProductDto
 import api.dto.sync.SyncStockBatchDto
@@ -58,28 +56,6 @@ fun SyncStockBatchDto.validate(): List<String> {
     if (locationId.isBlank()) errors.add("LocationId cannot be empty")
     if (quantity < 0) errors.add("Quantity cannot be lower than 0")
     if (price < 0.0) errors.add("Price cannot be lower than 0")
-    if (createdAt < 0L) errors.add("Invalid createdAt timestamp")
-    if (lastUpdated < 0L) errors.add("Invalid last updated")
-
-    return errors
-}
-
-fun SyncCategoryDto.validate(): List<String> {
-    val errors = mutableListOf<String>()
-
-    if (categoryId.isBlank()) errors.add("CategoryId cannot be empty")
-    if (name.isBlank()) errors.add("Name cannot be empty")
-    if (createdAt < 0L) errors.add("Invalid createdAt timestamp")
-    if (lastUpdated < 0L) errors.add("Invalid last updated")
-
-    return errors
-}
-
-fun SyncLocationDto.validate(): List<String> {
-    val errors = mutableListOf<String>()
-
-    if (locationId.isBlank()) errors.add("LocationId cannot be empty")
-    if (name.isBlank()) errors.add("Name cannot be empty")
     if (createdAt < 0L) errors.add("Invalid createdAt timestamp")
     if (lastUpdated < 0L) errors.add("Invalid last updated")
 

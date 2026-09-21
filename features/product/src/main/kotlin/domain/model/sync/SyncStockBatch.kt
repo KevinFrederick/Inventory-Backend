@@ -10,8 +10,8 @@ data class SyncStockBatch(
     val locationId: LocationId,
     val quantity: Int,
     val price: Double,
-    val expirationDate: Long? = null,
-    val supplier: String? = null,
+    val expirationDate: Long?,
+    val supplier: String?,
     val createdAt: Long,
     val lastUpdated: Long
 )

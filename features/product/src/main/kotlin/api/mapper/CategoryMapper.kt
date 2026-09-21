@@ -4,12 +4,14 @@ import api.dto.request.CategoryRequest
 import api.dto.response.CategoryResponse
 import domain.model.Category
 import domain.model.CategoryId
+import util.cleanInlineSpaces
+import util.toTitleCase
 
 fun CategoryRequest.toDomain(): Category =
     Category(
         categoryId = CategoryId(this.categoryId),
-        name = this.name,
-        description = this.description,
+        name = this.name.cleanInlineSpaces().toTitleCase(),
+        description = this.description?.cleanInlineSpaces(),
         createdAt = this.createdAt,
         lastUpdated = this.lastUpdated
     )
