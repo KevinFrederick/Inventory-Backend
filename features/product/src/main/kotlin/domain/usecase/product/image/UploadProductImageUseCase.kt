@@ -26,6 +26,11 @@ class UploadProductImageUseCase(
             )
         }
 
+        val productResult = repository.getProductById(productId)
+        if (productResult is DomainResult.Error) {
+            return productResult
+        }
+
         val jpgBytes = convertToJpgBytes(fileBytes)
         val filename = "${productId.value}.jpg"
 
