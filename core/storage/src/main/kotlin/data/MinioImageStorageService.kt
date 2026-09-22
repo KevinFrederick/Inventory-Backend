@@ -8,6 +8,7 @@ import io.minio.MakeBucketArgs
 import io.minio.MinioClient
 import io.minio.PutObjectArgs
 import io.minio.RemoveObjectArgs
+import io.minio.SetBucketPolicyArgs
 import java.io.ByteArrayInputStream
 
 class MinioImageStorageService(
@@ -15,17 +16,37 @@ class MinioImageStorageService(
     private val publicBaseUrl: String,
     private val bucketName: String
 ): ImageStorageService {
+    init {
+        val found = minioClient.bucketExists(
+            BucketExistsArgs.builder()
+                .bucket(bucketName)
+                .build()
+        )
+        if (!found) {
+            minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build())
+
+            val policy = """
+                    {
+                      "Version": "2012-10-17",
+                      "Statement": [
+                        {
+                          "Action": ["s3:GetObject"],
+                          "Effect": "Allow",
+                          "Principal": "*",
+                          "Resource": "arn:aws:s3:::$bucketName/*"
+                        }
+                      ]
+                    }
+                """.trimIndent()
+
+            minioClient.setBucketPolicy(
+                SetBucketPolicyArgs.Builder().bucket(bucketName).config(policy).build()
+            )
+        }
+    }
+
     override suspend fun saveImage(fileBytes: ByteArray, filename: String): DomainResult<String> {
         return try {
-            val found = minioClient.bucketExists(
-                BucketExistsArgs.builder()
-                    .bucket(bucketName)
-                    .build()
-            )
-            if (!found) {
-                minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build())
-            }
-
             val inputStream = ByteArrayInputStream(fileBytes)
 
             minioClient.putObject(
