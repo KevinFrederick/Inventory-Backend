@@ -2,6 +2,7 @@ services:
   cloudflared:
     image: cloudflare/cloudflared:latest
     container_name: cloudflare-tunnel
+    profiles: ["tunnel"]
     command: tunnel run
     environment:
       TUNNEL_TOKEN_FILE: /run/secrets/tunnel_token
