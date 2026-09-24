@@ -86,7 +86,7 @@ class LocationRepositoryImpl: LocationRepository {
             val errorMessage = e.message ?: ""
 
             when{
-                errorMessage.contains("location_name_key") ->
+                errorMessage.contains("location_name_unique") ->
                     DomainResult.Error("Location already exists", ErrorType.CONFLICT)
                 else ->
                     DomainResult.Error("Failed to saved location", ErrorType.UNKNOWN)
@@ -111,7 +111,7 @@ class LocationRepositoryImpl: LocationRepository {
             val errorMessage = e.message ?: ""
 
             when{
-                errorMessage.contains("location_name_key") ->
+                errorMessage.contains("location_name_unique") ->
                     DomainResult.Error("Location already exists", ErrorType.CONFLICT)
                 else ->
                     DomainResult.Error("Failed to saved location", ErrorType.UNKNOWN)

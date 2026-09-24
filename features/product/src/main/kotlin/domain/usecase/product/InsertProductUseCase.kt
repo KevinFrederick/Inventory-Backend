@@ -16,13 +16,21 @@ class InsertProductUseCase (
     private val productValidator: ProductValidator
 ) {
     suspend operator fun invoke(productParams: ProductParams): DomainResult<Product> {
-        val categoryResult = categoryRepository.getCategoryById(productParams.categoryId)
-        val category = (categoryResult as? DomainResult.Success)?.data
-            ?: return DomainResult.Error("Category not found", ErrorType.NOT_FOUND)
+        val category = when (
+            val categoryResult = categoryRepository.getCategoryById(productParams.categoryId)
+        ) {
+            is DomainResult.Success -> {
+                categoryResult.data ?: return DomainResult.Error("Category not found", ErrorType.NOT_FOUND)
+            }
+            is DomainResult.Error -> return categoryResult
+        }
 
-        val batchesResult = stockBatchAssembler.assembleBatches(productParams.batches)
-        val batches = (batchesResult as? DomainResult.Success)?.data
-            ?: return batchesResult as DomainResult.Error
+        val batches = when (
+            val batchesResult = stockBatchAssembler.assembleBatches(productParams.batches)
+        ) {
+            is DomainResult.Success -> batchesResult.data
+            is DomainResult.Error -> return batchesResult
+        }
 
         val product = Product(
             productId = productParams.productId,
@@ -30,6 +38,7 @@ class InsertProductUseCase (
             name = productParams.name,
             description = productParams.description,
             barcode = productParams.barcode,
+            barcodeFormat = productParams.barcodeFormat,
             sku = productParams.sku,
             imageUri = productParams.imageUri,
             minimumQuantity = productParams.minimumQuantity,

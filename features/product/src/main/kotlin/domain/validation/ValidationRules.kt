@@ -36,7 +36,7 @@ class ValidationRules {
         return errors
     }
 
-    inline fun <T> validateNumericOnly(
+    inline fun <T> validateBarcodeAsciiNoSpaces(
         item: T,
         getId: (T) -> String,
         getFieldName: () -> String,
@@ -45,9 +45,9 @@ class ValidationRules {
         val errors = mutableListOf<String>()
         val value = getValue(item) ?: return emptyList()
 
-        if (!value.all { it.isDigit() }) {
+        if (!value.matches(Regex("^[\\x21-\\x7E]+\$"))) {
             errors.add(
-                "${getId(item)}: ${getFieldName()} must contain only digits"
+                "${getId(item)}: ${getFieldName()} contains invalid characters or spaces"
             )
         }
 

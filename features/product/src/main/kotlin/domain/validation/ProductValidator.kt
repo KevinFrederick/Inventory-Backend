@@ -111,7 +111,7 @@ class ProductValidator (
         )
 
         errors.addAll(
-            validationRules.validateNumericOnly(
+            validationRules.validateBarcodeAsciiNoSpaces(
                 item = item,
                 getId = getId,
                 getFieldName = { "Barcode" },

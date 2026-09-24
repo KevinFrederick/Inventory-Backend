@@ -9,6 +9,7 @@ data class SyncProductDto(
     val name: String,
     val description: String? = null,
     val barcode: String? = null,
+    val barcodeFormat: String? = null,
     val sku: String? = null,
     val imageUri: String? = null,
     val minimumQuantity: Int = 0,

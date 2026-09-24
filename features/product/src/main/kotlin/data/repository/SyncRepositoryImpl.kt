@@ -142,6 +142,7 @@ class SyncRepositoryImpl: SyncRepository {
                         this[ProductTable.name] = product.name
                         this[ProductTable.description] = product.description
                         this[ProductTable.barcode] = product.barcode
+                        this[ProductTable.barcodeFormat] = product.barcodeFormat
                         this[ProductTable.sku] = product.sku
                         this[ProductTable.imageUri] = product.imageUri
                         this[ProductTable.minimumQuantity] = product.minimumQuantity
