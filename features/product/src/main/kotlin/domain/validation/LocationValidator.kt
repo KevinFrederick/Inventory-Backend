@@ -68,7 +68,7 @@ class LocationValidator(
         )
 
         errors.addAll(
-            validationRules.validateNumericOnly(
+            validationRules.validateBarcodeAsciiNoSpaces(
                 item = item,
                 getId = getId,
                 getFieldName = { "Location Barcode" },

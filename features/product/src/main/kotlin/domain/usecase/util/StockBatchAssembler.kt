@@ -12,31 +12,44 @@ class StockBatchAssembler (
     suspend fun assembleBatches(
         batches: List<StockBatchParams>
     ): DomainResult<List<StockBatch>> {
+        if (batches.isEmpty()) {
+            return DomainResult.Success(emptyList())
+        }
+
         val locationIds = batches.map { it.locationId }.distinct()
 
-        val locationResult = locationRepository.getLocationsByIds(locationIds)
-        val locations = (locationResult as? DomainResult.Success)?.data
-            ?: return locationResult as DomainResult.Error
+        val locations = when (
+            val locationResult = locationRepository.getLocationsByIds(locationIds)
+        ) {
+            is DomainResult.Success -> {
+                if (locationResult.data.isEmpty()) {
+                    return DomainResult.Error("No locations found", ErrorType.NOT_FOUND)
+                }
+
+                locationResult.data
+            }
+            is DomainResult.Error -> return locationResult
+        }
 
         val locationMap = locations.associateBy { it.locationId }
 
         val assembledBatches = mutableListOf<StockBatch>()
 
-        for (param in batches) {
-            val location = locationMap[param.locationId]
-                ?: return DomainResult.Error("Location not found for batch ${param.batchId}", ErrorType.NOT_FOUND)
+        for ((batchId, productId, locationId, quantity, price, expirationDate, supplier, createdAt, lastUpdated) in batches) {
+            val location = locationMap[locationId]
+                ?: return DomainResult.Error("Location not found for batch $batchId", ErrorType.NOT_FOUND)
 
             assembledBatches.add(
                 StockBatch(
-                    batchId = param.batchId,
-                    productId = param.productId,
+                    batchId = batchId,
+                    productId = productId,
                     location = location,
-                    quantity = param.quantity,
-                    price = param.price,
-                    expirationDate = param.expirationDate,
-                    supplier = param.supplier,
-                    createdAt = param.createdAt,
-                    lastUpdated = param.lastUpdated
+                    quantity = quantity,
+                    price = price,
+                    expirationDate = expirationDate,
+                    supplier = supplier,
+                    createdAt = createdAt,
+                    lastUpdated = lastUpdated
                 )
             )
         }

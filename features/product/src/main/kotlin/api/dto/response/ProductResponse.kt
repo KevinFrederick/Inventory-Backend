@@ -9,6 +9,7 @@ data class ProductResponse (
     val name: String,
     val description: String?,
     val barcode: String?,
+    val barcodeFormat: String?,
     val sku: String?,
     val imageUri: String?,
     val minimumQuantity: Int,

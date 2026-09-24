@@ -69,10 +69,10 @@ class StockBatchRepositoryImpl: StockBatchRepository {
             val errorMessage = e.message ?: ""
 
             when{
-                errorMessage.contains("stock_batch_product_id_fkey") ->
-                    DomainResult.Error("Invalid Product ID", ErrorType.NOT_FOUND)
-                errorMessage.contains("stock_batch_location_id_fkey") ->
-                    DomainResult.Error("Invalid Location ID", ErrorType.NOT_FOUND)
+                errorMessage.contains("fk_stock_batch_product_id__product_id") ->
+                    DomainResult.Error("Product Not Found", ErrorType.NOT_FOUND)
+                errorMessage.contains("fk_stock_batch_location_id__location_id") ->
+                    DomainResult.Error("Location Not Found", ErrorType.NOT_FOUND)
                 else ->
                     DomainResult.Error("Failed to saved Batch", ErrorType.UNKNOWN)
             }

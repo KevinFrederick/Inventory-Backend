@@ -3,9 +3,11 @@ package domain.usecase.stockbatch
 import domain.model.StockBatch
 import domain.model.StockBatchParams
 import domain.repository.LocationRepository
+import domain.repository.ProductRepository
 import domain.repository.StockBatchRepository
 import domain.validation.StockBatchValidator
 import result.DomainResult
+import result.ErrorType
 
 class InsertStockBatchUseCase (
     private val batchRepository: StockBatchRepository,
@@ -13,10 +15,17 @@ class InsertStockBatchUseCase (
     private val stockBatchValidator: StockBatchValidator
 ) {
     suspend operator fun invoke(batchParams: StockBatchParams): DomainResult<StockBatch> {
-        val locationResult = locationRepository.getLocationById(batchParams.locationId)
-
-        val location = (locationResult as? DomainResult.Success)?.data
-            ?: return locationResult as DomainResult.Error
+        val location = when (
+            val locationResult = locationRepository.getLocationById(batchParams.locationId)
+        ) {
+            is DomainResult.Success -> {
+                locationResult.data ?: return DomainResult.Error(
+                    "Location not found",
+                    ErrorType.NOT_FOUND
+                )
+            }
+            is DomainResult.Error -> return locationResult
+        }
 
         val batch = StockBatch(
             batchId = batchParams.batchId,

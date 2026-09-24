@@ -90,6 +90,7 @@ class ProductRepositoryImpl: ProductRepository {
                 it[name] = product.name
                 it[description] = product.description
                 it[barcode] = product.barcode
+                it[barcodeFormat] = product.barcodeFormat
                 it[sku] = product.sku
                 it[imageUri] = product.imageUri
                 it[minimumQuantity] = product.minimumQuantity
@@ -119,12 +120,14 @@ class ProductRepositoryImpl: ProductRepository {
             val errorMessage = e.message ?: ""
 
             when{
-                errorMessage.contains("product_sku_key") ->
+                errorMessage.contains("product_sku_unique") ->
                     DomainResult.Error("SKU already exists", ErrorType.CONFLICT)
+                errorMessage.contains("product_barcode_unique") ->
+                    DomainResult.Error("Barcode already exists", ErrorType.CONFLICT)
                 errorMessage.contains("product_category_id_fkey") ->
                     DomainResult.Error("Invalid Category ID", ErrorType.NOT_FOUND)
                 else ->
-                    DomainResult.Error("Failed to saved product", ErrorType.UNKNOWN)
+                    DomainResult.Error("Failed to save product", ErrorType.UNKNOWN)
             }
         }
     }
@@ -136,6 +139,7 @@ class ProductRepositoryImpl: ProductRepository {
                 it[name] = product.name
                 it[description] = product.description
                 it[barcode] = product.barcode
+                it[barcodeFormat] = product.barcodeFormat
                 it[sku] = product.sku
                 it[imageUri] = product.imageUri
                 it[minimumQuantity] = product.minimumQuantity
@@ -152,12 +156,14 @@ class ProductRepositoryImpl: ProductRepository {
             val errorMessage = e.message ?: ""
 
             when{
-                errorMessage.contains("product_sku_key") ->
+                errorMessage.contains("product_sku_unique") ->
                     DomainResult.Error("SKU already exists", ErrorType.CONFLICT)
+                errorMessage.contains("product_barcode_unique") ->
+                    DomainResult.Error("Barcode already exists", ErrorType.CONFLICT)
                 errorMessage.contains("product_category_id_fkey") ->
                     DomainResult.Error("Invalid Category ID", ErrorType.NOT_FOUND)
                 else ->
-                    DomainResult.Error("Failed to saved product", ErrorType.UNKNOWN)
+                    DomainResult.Error("Failed to save product", ErrorType.UNKNOWN)
             }
         }
     }

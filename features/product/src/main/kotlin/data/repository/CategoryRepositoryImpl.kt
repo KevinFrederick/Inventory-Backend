@@ -67,7 +67,7 @@ class CategoryRepositoryImpl: CategoryRepository {
             val errorMessage = e.message ?: ""
 
             when{
-                errorMessage.contains("category_name_key") ->
+                errorMessage.contains("category_name_unique") ->
                     DomainResult.Error("Category already exists", ErrorType.CONFLICT)
                 else ->
                     DomainResult.Error("Failed to saved category", ErrorType.UNKNOWN)
@@ -91,7 +91,7 @@ class CategoryRepositoryImpl: CategoryRepository {
             val errorMessage = e.message ?: ""
 
             when{
-                errorMessage.contains("category_name_key") ->
+                errorMessage.contains("category_name_unique") ->
                     DomainResult.Error("Category already exists", ErrorType.CONFLICT)
                 else ->
                     DomainResult.Error("Failed to saved category", ErrorType.UNKNOWN)

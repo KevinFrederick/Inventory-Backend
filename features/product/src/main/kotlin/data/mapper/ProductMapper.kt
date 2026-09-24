@@ -13,6 +13,7 @@ fun ResultRow.toProduct(batches: List<StockBatch>): Product =
         description = this[ProductTable.description],
         category = this.toCategory(),
         barcode = this[ProductTable.barcode],
+        barcodeFormat = this[ProductTable.barcodeFormat],
         sku = this[ProductTable.sku],
         imageUri = this[ProductTable.imageUri],
         minimumQuantity = this[ProductTable.minimumQuantity],

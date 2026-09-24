@@ -14,7 +14,8 @@ object ProductTable: Table("product") {
 
     val name = varchar("name", 255)
     val description = text("description").nullable()
-    val barcode = varchar("barcode", 64).nullable()
+    val barcode = varchar("barcode", 64).uniqueIndex().nullable()
+    val barcodeFormat = varchar("barcode_format", 64).nullable()
     val sku = varchar("sku", 128).uniqueIndex().nullable()
     val imageUri = text("image_uri").nullable()
     val minimumQuantity = integer("minimum_quantity").default(0)

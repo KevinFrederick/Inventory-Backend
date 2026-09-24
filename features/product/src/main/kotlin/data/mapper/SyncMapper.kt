@@ -17,6 +17,7 @@ fun ResultRow.toSyncProduct(): SyncProduct =
         name = this[ProductTable.name],
         description = this[ProductTable.description],
         barcode = this[ProductTable.barcode],
+        barcodeFormat = this[ProductTable.barcodeFormat],
         sku = this[ProductTable.sku],
         imageUri = this[ProductTable.imageUri],
         minimumQuantity = this[ProductTable.minimumQuantity],
