@@ -26,6 +26,7 @@ dependencies {
     implementation(ktorLibs.server.forwardedHeader)
     implementation(ktorLibs.server.requestValidation)
     implementation(ktorLibs.server.statusPages)
+    implementation(ktorLibs.server.websockets)
     implementation(libs.logback.classic)
 
     implementation(platform(libs.koin.bom))

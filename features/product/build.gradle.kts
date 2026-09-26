@@ -16,6 +16,7 @@ dependencies {
 
     implementation(ktorLibs.server.resources)
     implementation(ktorLibs.server.requestValidation)
+    implementation(ktorLibs.server.websockets)
     implementation(libs.kotlinx.serialization)
 
     testImplementation(kotlin("test"))
