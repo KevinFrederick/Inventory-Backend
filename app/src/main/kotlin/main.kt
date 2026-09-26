@@ -5,6 +5,7 @@ import com.kevinfreyap.plugins.configureProxySupport
 import com.kevinfreyap.plugins.configureRateLimit
 import com.kevinfreyap.plugins.configureResources
 import com.kevinfreyap.plugins.configureSerialization
+import com.kevinfreyap.plugins.configureSockets
 import io.ktor.server.application.Application
 
 fun main(args: Array<String>) {
@@ -23,6 +24,7 @@ fun Application.module() {
     configureProxySupport()
     configureRateLimit()
     configureValidation()
+    configureSockets()
 
     configureRouting()
 }

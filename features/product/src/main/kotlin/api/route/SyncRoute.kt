@@ -4,6 +4,7 @@ import api.dto.sync.SyncPayloadDto
 import api.mapper.toDomain
 import api.mapper.toDto
 import api.mapper.toHttpStatusCode
+import api.socket.SyncSocketManager
 import domain.usecase.sync.SyncUseCase
 import io.ktor.http.HttpStatusCode
 import io.ktor.resources.Resource
@@ -14,6 +15,8 @@ import io.ktor.server.routing.Route
 import io.ktor.server.resources.post
 import io.ktor.server.response.respond
 import io.ktor.server.resources.get
+import io.ktor.server.websocket.webSocket
+import io.ktor.websocket.send
 import kotlinx.serialization.Serializable
 import org.koin.ktor.ext.inject
 import result.DomainResult
@@ -29,6 +32,18 @@ class SyncResource {
 fun Route.syncRoute() {
     val useCases: SyncUseCase by inject()
 
+    webSocket("/sync/ws") {
+        SyncSocketManager.collections.add(this)
+        try {
+            for (frame in incoming) {
+                // Ignored: App uses REST to push data.
+                // This loop just keeps the connection alive.
+            }
+        } finally {
+            SyncSocketManager.collections.remove(this)
+        }
+    }
+
     rateLimit (RateLimitName("upload_limit")) {
         post<SyncResource> {
             val syncRequest = call.receive<SyncPayloadDto>()
@@ -37,7 +52,13 @@ fun Route.syncRoute() {
             when(
                 val result = useCases.syncPush(syncPayload)
             ) {
-                is DomainResult.Success -> call.respond(HttpStatusCode.OK, result.data.toDto())
+                is DomainResult.Success -> {
+                    call.respond(HttpStatusCode.OK, result.data.toDto())
+
+                    SyncSocketManager.collections.forEach { session ->
+                        session.send("SYNC_REQUIRED")
+                    }
+                }
                 is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
             }
         }
