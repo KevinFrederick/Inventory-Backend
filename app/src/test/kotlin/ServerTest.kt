@@ -4,6 +4,7 @@ import com.kevinfreyap.plugins.configureProxySupport
 import com.kevinfreyap.plugins.configureRateLimit
 import com.kevinfreyap.plugins.configureResources
 import com.kevinfreyap.plugins.configureSerialization
+import com.kevinfreyap.plugins.configureSockets
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.http.HttpHeaders
@@ -25,6 +26,8 @@ class ServerTest {
             configureResources()
             configureProxySupport()
             configureRateLimit()
+            configureValidation()
+            configureSockets()
             configureRouting()
         }
 
