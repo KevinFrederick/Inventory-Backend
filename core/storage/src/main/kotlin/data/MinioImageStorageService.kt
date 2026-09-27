@@ -55,6 +55,7 @@ class MinioImageStorageService(
                     .`object`(filename)
                     .stream(inputStream, fileBytes.size.toLong(), -1)
                     .contentType("image/jpg")
+                    .headers(mapOf("Cache-Control" to "no-cache, no-store, must-revalidate"))
                     .build(),
             )
 
