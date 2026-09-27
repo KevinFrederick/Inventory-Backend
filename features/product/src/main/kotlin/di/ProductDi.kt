@@ -63,7 +63,7 @@ val productModule = module {
     factory { GetProductByIdUseCase(get()) }
     factory { InsertProductUseCase(get(), get(), get(), get()) }
     factory { UpdateProductUseCase(get(), get(), get(), get()) }
-    factory { UploadProductImageUseCase(get(), get())}
+    factory { UploadProductImageUseCase(get())}
     factory { DeleteProductUseCase(get()) }
     factory { DeleteProductImageUseCase(get(), get()) }
     factory {
