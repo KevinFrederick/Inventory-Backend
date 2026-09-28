@@ -1,12 +1,19 @@
 # Inventory Management Backend
 
-A RESTful API built with Kotlin and Ktor, designed to support an offline-first Android application.
+A high-performance, containerized Ktor backend service built to power the Android inventory application, featuring MinIO cloud storage, rate limiting, and offline-first data synchronization
+
+## Key Features
+* **REST & Real-Time Sync:** Robust endpoints and WebSocket management (`SyncSocketManager.kt`) for handling offline-first client synchronization.
+* **Cloud Object Storage:** Integrated MinIO service (`core:storage`) for secure multipart image uploads.
+* **Production-Ready Middlewares:** Built-in rate limiting, proxy redundancy configurations, and request validation pipelines.
+* **Database Management:** Modularized database factory layer (`core:database`) ensuring clean data persistence.
 
 ## Tech Stack
-* **Framework:** Ktor
+* **Language & Framework:** Kotlin, Ktor Server
 * **Database:** PostgreSQL (via Exposed ORM)
 * **Storage:** MinIO (S3-compatible object storage for images)
 * **Architecture:** Clean Architecture (Domain -> Use Case -> Ktor Route)
+* **Containerization:** Docker
 
 ## Architecture & Flow
 This project strictly separates business logic from framework details:
@@ -18,13 +25,13 @@ This project strictly separates business logic from framework details:
 ## Offline-First Sync Mechanism
 The API relies on a bulk push/pull sync engine rather than single-item CRUD operations.
 
-* **Endpoint:** `POST /api/v1/sync`
-* **Flow:** The `SyncPushUseCase` intercepts a payload of created/updated `Categories`, `Locations`, `Products`, and `Batches`.
+* **Endpoint:** `POST /sync`, `GET /sync/pull`
+* **REST Endpoints (`SyncRoute.kt`):** Intercepts bulk payloads (`SyncPayloadDto`) containing batches of created, updated, or deleted `Categories`, `Locations`, `Products`, and `StockBatches`
+* **Real-Time Sync:** Manages active socket connections to push live state updates to connected clients.
 * **Validation:** It runs validation across all arrays before committing. If any item is malformed, the entire sync batch is rejected.
 * **Conflict Handling:** The database uses `UPSERT` mechanisms. If a client pushes a record with an existing ID, the server cleanly overwrites it to match the client's latest state.
 
 ## Building & Running Locally
-
 This project is fully containerized and uses Docker Secrets for secure credential management, alongside Cloudflare Tunnels for secure external access.
 
 ### Prerequisites
