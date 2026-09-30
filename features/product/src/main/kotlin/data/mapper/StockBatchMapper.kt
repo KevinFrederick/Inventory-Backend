@@ -1,6 +1,6 @@
 package data.mapper
 
-import data.local.table.StockBatchTable
+import data.table.product.StockBatchTable
 import domain.model.BatchId
 import domain.model.ProductId
 import domain.model.StockBatch

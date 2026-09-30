@@ -1,6 +1,6 @@
 package data.mapper
 
-import data.local.table.LocationTable
+import data.table.product.LocationTable
 import domain.model.Location
 import domain.model.LocationId
 import org.jetbrains.exposed.v1.core.ResultRow

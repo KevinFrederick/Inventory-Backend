@@ -1,4 +1,4 @@
-package api.mapper
+package util
 
 import result.ErrorType
 import io.ktor.http.HttpStatusCode
@@ -9,5 +9,7 @@ fun ErrorType.toHttpStatusCode(): HttpStatusCode {
         ErrorType.NOT_FOUND -> HttpStatusCode.NotFound
         ErrorType.UNKNOWN -> HttpStatusCode.InternalServerError
         ErrorType.BAD_REQUEST -> HttpStatusCode.BadRequest
+        ErrorType.UNAUTHORIZED -> HttpStatusCode.Unauthorized
+        ErrorType.FORBIDDEN -> HttpStatusCode.Forbidden
     }
 }

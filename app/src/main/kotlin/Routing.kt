@@ -1,5 +1,6 @@
 package com.kevinfreyap
 
+import api.route.authRoute
 import api.route.categoryRoutes
 import api.route.locationRoutes
 import io.ktor.server.application.Application
@@ -21,5 +22,6 @@ fun Application.configureRouting() {
         locationRoutes()
         stockBatchRoutes()
         syncRoute()
+        authRoute()
     }
 }

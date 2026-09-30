@@ -16,6 +16,7 @@ dependencies {
     implementation(project(":core:database"))
     implementation(project(":core:storage"))
     implementation(project(":features:product"))
+    implementation(project(":features:auth"))
 
     implementation(ktorLibs.serialization.kotlinx.json)
     implementation(ktorLibs.server.resources)
@@ -27,6 +28,7 @@ dependencies {
     implementation(ktorLibs.server.requestValidation)
     implementation(ktorLibs.server.statusPages)
     implementation(ktorLibs.server.websockets)
+    implementation(ktorLibs.server.auth.jwt)
     implementation(libs.logback.classic)
 
     implementation(platform(libs.koin.bom))

@@ -2,10 +2,10 @@ package domain.validation
 
 import domain.model.Category
 import result.DomainResult
+import validation.ValidationResult
+import validation.ValidationRules
 
-class CategoryValidator(
-    private val validationRules: ValidationRules
-) {
+class CategoryValidator {
     fun validateCategory(category: Category): DomainResult<Unit> {
         val errors = validateFields(
             item = category,
@@ -30,7 +30,7 @@ class CategoryValidator(
         val errors = mutableListOf<String>()
 
         errors.addAll(
-            validationRules.validateStringLengthAndFormat(
+            ValidationRules.validateStringLengthAndFormat(
                 item = item,
                 getId = getId,
                 getFieldName = { "Name" },
@@ -42,7 +42,7 @@ class CategoryValidator(
         )
 
         errors.addAll(
-            validationRules.validateStringLengthAndFormat(
+            ValidationRules.validateStringLengthAndFormat(
                 item = item,
                 getId = getId,
                 getFieldName = { "Description" },
@@ -54,7 +54,7 @@ class CategoryValidator(
         )
 
         errors.addAll(
-            validationRules.validateTimestamps(
+            ValidationRules.validateTimestamps(
                 item = item,
                 getId = getId,
                 getCreatedAt = getCreatedAt,

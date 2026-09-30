@@ -3,7 +3,9 @@ package com.kevinfreyap
 import api.validation.batchValidation
 import api.validation.categoryValidation
 import api.validation.locationValidation
+import api.validation.loginValidation
 import api.validation.productValidation
+import api.validation.registerValidation
 import api.validation.syncValidation
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
@@ -21,6 +23,9 @@ fun Application.configureValidation() {
         categoryValidation()
         locationValidation()
         syncValidation()
+
+        registerValidation()
+        loginValidation()
     }
 
     install(StatusPages) {

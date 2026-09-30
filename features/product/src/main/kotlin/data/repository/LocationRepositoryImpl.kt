@@ -1,8 +1,8 @@
 package data.repository
 
 import DatabaseFactory.dbQuery
-import data.local.table.DeletedTable
-import data.local.table.LocationTable
+import data.table.product.DeletedTable
+import data.table.product.LocationTable
 import data.mapper.toLocation
 import data.util.EntityType
 import domain.model.Location

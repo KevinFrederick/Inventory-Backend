@@ -1,8 +1,8 @@
 package data.repository
 
 import DatabaseFactory.dbQuery
-import data.local.table.CategoryTable
-import data.local.table.DeletedTable
+import data.table.product.CategoryTable
+import data.table.product.DeletedTable
 import data.mapper.toCategory
 import data.util.EntityType
 import domain.model.Category

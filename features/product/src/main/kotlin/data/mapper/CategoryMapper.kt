@@ -1,6 +1,6 @@
 package data.mapper
 
-import data.local.table.CategoryTable
+import data.table.product.CategoryTable
 import domain.model.Category
 import domain.model.CategoryId
 import org.jetbrains.exposed.v1.core.ResultRow
