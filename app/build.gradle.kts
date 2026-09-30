@@ -36,6 +36,7 @@ dependencies {
     implementation(libs.koin.logger)
 
     testImplementation(kotlin("test"))
+    testImplementation(libs.mockk)
     testImplementation(ktorLibs.server.testHost)
 }
 
