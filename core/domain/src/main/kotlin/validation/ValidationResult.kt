@@ -1,4 +1,4 @@
-package domain.validation
+package validation
 
 import result.DomainResult
 import result.ErrorType

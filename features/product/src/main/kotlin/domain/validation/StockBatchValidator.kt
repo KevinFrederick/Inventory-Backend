@@ -3,9 +3,10 @@ package domain.validation
 import domain.model.StockBatch
 import domain.model.sync.SyncStockBatch
 import result.DomainResult
+import validation.ValidationResult
+import validation.ValidationRules
 
 class StockBatchValidator (
-    private val validationRules: ValidationRules,
     private val locationValidator: LocationValidator,
 ) {
     fun validateStockBatch(batch: StockBatch): DomainResult<Unit> {
@@ -56,7 +57,7 @@ class StockBatchValidator (
         val errors = mutableListOf<String>()
 
         errors.addAll(
-            validationRules.validateExpirationDate(
+            validateExpirationDate(
                 item = item,
                 getId = getId,
                 getCreatedAt = getCreatedAt,
@@ -65,7 +66,7 @@ class StockBatchValidator (
         )
         
         errors.addAll(
-            validationRules.validateStringLengthAndFormat(
+            ValidationRules.validateStringLengthAndFormat(
                 item = item,
                 getId = getId,
                 getFieldName = { "Supplier" },
@@ -77,7 +78,7 @@ class StockBatchValidator (
         )
 
         errors.addAll(
-            validationRules.validateTimestamps(
+            ValidationRules.validateTimestamps(
                 item = item,
                 getId = getId,
                 getCreatedAt = getCreatedAt,

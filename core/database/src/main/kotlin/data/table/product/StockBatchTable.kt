@@ -1,4 +1,4 @@
-package data.local.table
+package data.table.product
 
 import org.jetbrains.exposed.v1.core.ReferenceOption
 import org.jetbrains.exposed.v1.core.Table

@@ -43,7 +43,6 @@ import domain.validation.CategoryValidator
 import domain.validation.LocationValidator
 import domain.validation.ProductValidator
 import domain.validation.StockBatchValidator
-import domain.validation.ValidationRules
 import org.koin.dsl.module
 
 val productModule = module {
@@ -134,9 +133,8 @@ val productModule = module {
     }
 
     // Validator
-    single<ValidationRules> { ValidationRules() }
-    factory { LocationValidator(get()) }
-    factory { CategoryValidator(get()) }
-    factory { StockBatchValidator(get(), get()) }
-    factory { ProductValidator(get(), get(), get()) }
+    factory { LocationValidator() }
+    factory { CategoryValidator() }
+    factory { StockBatchValidator(get()) }
+    factory { ProductValidator(get(), get()) }
 }

@@ -3,9 +3,10 @@ package domain.validation
 import domain.model.Product
 import domain.model.sync.SyncProduct
 import result.DomainResult
+import validation.ValidationResult
+import validation.ValidationRules
 
 class ProductValidator (
-    private val validationRules: ValidationRules,
     private val stockBatchValidator: StockBatchValidator,
     private val categoryValidator: CategoryValidator
 ) {
@@ -75,7 +76,7 @@ class ProductValidator (
         val errors = mutableListOf<String>()
 
         errors.addAll(
-            validationRules.validateStringLengthAndFormat(
+            ValidationRules.validateStringLengthAndFormat(
                 item = item,
                 getId = getId,
                 getFieldName = { "Name" },
@@ -87,7 +88,7 @@ class ProductValidator (
         )
 
         errors.addAll(
-            validationRules.validateStringLengthAndFormat(
+            ValidationRules.validateStringLengthAndFormat(
                 item = item,
                 getId = getId,
                 getFieldName = { "Description" },
@@ -99,7 +100,7 @@ class ProductValidator (
         )
 
         errors.addAll(
-            validationRules.validateStringLengthAndFormat(
+            ValidationRules.validateStringLengthAndFormat(
                 item = item,
                 getId = getId,
                 getFieldName = { "Barcode" },
@@ -111,7 +112,7 @@ class ProductValidator (
         )
 
         errors.addAll(
-            validationRules.validateBarcodeAsciiNoSpaces(
+            validateBarcodeAsciiNoSpaces(
                 item = item,
                 getId = getId,
                 getFieldName = { "Barcode" },
@@ -120,7 +121,7 @@ class ProductValidator (
         )
 
         errors.addAll(
-            validationRules.validateStringLengthAndFormat(
+            ValidationRules.validateStringLengthAndFormat(
                 item = item,
                 getId = getId,
                 getFieldName = { "SKU" },
@@ -132,7 +133,7 @@ class ProductValidator (
         )
 
         errors.addAll(
-            validationRules.validateStringLengthAndFormat(
+            ValidationRules.validateStringLengthAndFormat(
                 item = item,
                 getId = getId,
                 getFieldName = { "Image Uri" },
@@ -144,7 +145,7 @@ class ProductValidator (
         )
 
         errors.addAll(
-            validationRules.validateTimestamps(
+            ValidationRules.validateTimestamps(
                 item = item,
                 getId = getId,
                 getCreatedAt = getCreatedAt,

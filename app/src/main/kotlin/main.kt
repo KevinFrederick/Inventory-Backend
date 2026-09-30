@@ -25,6 +25,7 @@ fun Application.module() {
     configureRateLimit()
     configureValidation()
     configureSockets()
+    configureSecurity()
 
     configureRouting()
 }

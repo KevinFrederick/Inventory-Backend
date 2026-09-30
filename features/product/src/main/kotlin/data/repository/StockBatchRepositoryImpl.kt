@@ -1,10 +1,10 @@
 package data.repository
 
 import DatabaseFactory.dbQuery
-import data.local.table.DeletedTable
-import data.local.table.LocationTable
-import data.local.table.ProductTable
-import data.local.table.StockBatchTable
+import data.table.product.DeletedTable
+import data.table.product.LocationTable
+import data.table.product.ProductTable
+import data.table.product.StockBatchTable
 import data.mapper.toStockBatch
 import data.util.EntityType
 import domain.model.BatchId

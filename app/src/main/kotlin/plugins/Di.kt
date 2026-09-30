@@ -1,5 +1,6 @@
 package com.kevinfreyap.plugins
 
+import di.authModule
 import di.databaseModule
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -13,8 +14,9 @@ fun Application.configureDI() {
         slf4jLogger()
         modules(
             databaseModule,
+            storageModule,
             productModule,
-            storageModule
+            authModule(environment.config)
         )
     }
 }

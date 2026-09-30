@@ -13,6 +13,10 @@ kotlinxSerialization = "1.6.0"
 
 minio = "9.0.3"
 
+argon2Hasher = "2.12"
+
+mockk = "1.13.12"
+
 [libraries]
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 
@@ -32,6 +36,10 @@ koin-logger = { module = "io.insert-koin:koin-logger-slf4j" }
 kotlinx-serialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 
 minio = { module = "io.minio:minio", version.ref = "minio" }
+
+argon2 = { module = "de.mkammerer:argon2-jvm", version.ref = "argon2Hasher" }
+
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

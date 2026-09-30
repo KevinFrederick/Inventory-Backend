@@ -2,10 +2,10 @@ package domain.validation
 
 import domain.model.Location
 import result.DomainResult
+import validation.ValidationResult
+import validation.ValidationRules
 
-class LocationValidator(
-    private val validationRules: ValidationRules
-) {
+class LocationValidator {
     fun validateLocation(location: Location): DomainResult<Unit> {
         val errors = validateFields(
             item = location,
@@ -32,7 +32,7 @@ class LocationValidator(
         val errors = mutableListOf<String>()
 
         errors.addAll(
-            validationRules.validateStringLengthAndFormat(
+            ValidationRules.validateStringLengthAndFormat(
                 item = item,
                 getId = getId,
                 getFieldName = { "Name" },
@@ -44,7 +44,7 @@ class LocationValidator(
         )
 
         errors.addAll(
-            validationRules.validateStringLengthAndFormat(
+            ValidationRules.validateStringLengthAndFormat(
                 item = item,
                 getId = getId,
                 getFieldName = { "Description" },
@@ -56,7 +56,7 @@ class LocationValidator(
         )
 
         errors.addAll(
-            validationRules.validateStringLengthAndFormat(
+            ValidationRules.validateStringLengthAndFormat(
                 item = item,
                 getId = getId,
                 getFieldName = { "Location Barcode" },
@@ -68,7 +68,7 @@ class LocationValidator(
         )
 
         errors.addAll(
-            validationRules.validateBarcodeAsciiNoSpaces(
+            validateBarcodeAsciiNoSpaces(
                 item = item,
                 getId = getId,
                 getFieldName = { "Location Barcode" },
@@ -77,7 +77,7 @@ class LocationValidator(
         )
 
         errors.addAll(
-            validationRules.validateTimestamps(
+            ValidationRules.validateTimestamps(
                 item = item,
                 getId = getId,
                 getCreatedAt = getCreatedAt,

@@ -1,10 +1,14 @@
 package com.kevinfreyap
 
-import data.local.table.CategoryTable
-import data.local.table.DeletedTable
-import data.local.table.LocationTable
-import data.local.table.ProductTable
-import data.local.table.StockBatchTable
+import data.table.auth.GroupTable
+import data.table.auth.RefreshTokenTable
+import data.table.auth.UserGroupTable
+import data.table.auth.UserTable
+import data.table.product.CategoryTable
+import data.table.product.DeletedTable
+import data.table.product.LocationTable
+import data.table.product.ProductTable
+import data.table.product.StockBatchTable
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
@@ -13,10 +17,14 @@ fun initializeDatabaseSchema() {
         SchemaUtils.create(
             CategoryTable,
             LocationTable,
-
             ProductTable,
             StockBatchTable,
-            DeletedTable
+            DeletedTable,
+
+            UserTable,
+            GroupTable,
+            UserGroupTable,
+            RefreshTokenTable
         )
     }
 }
