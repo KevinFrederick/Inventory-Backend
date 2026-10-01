@@ -13,4 +13,5 @@ interface AuthRepository {
     suspend fun findRefreshToken(token: String): RefreshToken?
     suspend fun revokeRefreshToken(token: String)
     suspend fun revokeAllUserTokens(userId: UserId)
+    suspend fun deleteExpiredTokens()
 }

@@ -10,7 +10,9 @@ import domain.model.User
 import domain.model.UserId
 import domain.repository.AuthRepository
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.lessEq
 import org.jetbrains.exposed.v1.exceptions.ExposedSQLException
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.update
@@ -95,5 +97,13 @@ class AuthRepositoryImpl: AuthRepository {
             it[isRevoked] = true
         }
         Unit
+    }
+
+    override suspend fun deleteExpiredTokens() {
+        dbQuery {
+            RefreshTokenTable.deleteWhere {
+                RefreshTokenTable.expiresAt lessEq System.currentTimeMillis()
+            }
+        }
     }
 }

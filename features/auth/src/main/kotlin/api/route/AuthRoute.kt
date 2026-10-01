@@ -10,6 +10,8 @@ import api.mapper.toResponse
 import domain.usecase.AuthUseCases
 import io.ktor.http.HttpStatusCode
 import io.ktor.resources.Resource
+import io.ktor.server.plugins.ratelimit.RateLimitName
+import io.ktor.server.plugins.ratelimit.rateLimit
 import io.ktor.server.request.receive
 import io.ktor.server.resources.post
 import io.ktor.server.response.respond
@@ -42,71 +44,73 @@ class AuthResource {
 fun Route.authRoute() {
     val useCases: AuthUseCases by inject()
 
-    post<AuthResource.Register> {
-        val request = call.receive<RegisterRequest>()
+    rateLimit(RateLimitName("auth_limit")) {
+        post<AuthResource.Register> {
+            val request = call.receive<RegisterRequest>()
 
-        when (
-            val result = useCases.register(
-                name = request.name,
-                email = request.email,
-                rawPassword = request.password
-            )
-        ) {
-            is DomainResult.Success -> {
-                val session = result.data
-                call.respond(
-                    HttpStatusCode.Created,
-                    AuthResponse(
-                        accessToken = session.tokens.accessToken,
-                        refreshToken = session.tokens.refreshToken,
-                        user = session.user.toResponse()
-                    )
+            when (
+                val result = useCases.register(
+                    name = request.name,
+                    email = request.email,
+                    rawPassword = request.password
                 )
+            ) {
+                is DomainResult.Success -> {
+                    val session = result.data
+                    call.respond(
+                        HttpStatusCode.Created,
+                        AuthResponse(
+                            accessToken = session.tokens.accessToken,
+                            refreshToken = session.tokens.refreshToken,
+                            user = session.user.toResponse()
+                        )
+                    )
+                }
+                is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
             }
-            is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
         }
-    }
 
-    post<AuthResource.Login> {
-        val request = call.receive<LoginRequest>()
+        post<AuthResource.Login> {
+            val request = call.receive<LoginRequest>()
 
-        when(
-            val result = useCases.login(
-                email = request.email,
-                rawPassword = request.password
-            )
-        ) {
-            is DomainResult.Success -> {
-                val session = result.data
-                call.respond(
-                    HttpStatusCode.OK,
-                    AuthResponse(
-                        accessToken = session.tokens.accessToken,
-                        refreshToken = session.tokens.refreshToken,
-                        user = session.user.toResponse()
-                    )
+            when(
+                val result = useCases.login(
+                    email = request.email,
+                    rawPassword = request.password
                 )
+            ) {
+                is DomainResult.Success -> {
+                    val session = result.data
+                    call.respond(
+                        HttpStatusCode.OK,
+                        AuthResponse(
+                            accessToken = session.tokens.accessToken,
+                            refreshToken = session.tokens.refreshToken,
+                            user = session.user.toResponse()
+                        )
+                    )
+                }
+                is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
             }
-            is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
         }
-    }
 
-    post<AuthResource.Refresh> {
-        val request = call.receive<RefreshTokenRequest>()
+        post<AuthResource.Refresh> {
+            val request = call.receive<RefreshTokenRequest>()
 
-        when(
-            val result = useCases.refreshToken(request.refreshToken)
-        ) {
-            is DomainResult.Success -> {
-                call.respond(
-                    HttpStatusCode.OK,
-                    TokenResponse(
-                        accessToken = result.data.accessToken,
-                        refreshToken = result.data.refreshToken
+            when(
+                val result = useCases.refreshToken(request.refreshToken)
+            ) {
+                is DomainResult.Success -> {
+                    call.respond(
+                        HttpStatusCode.OK,
+                        TokenResponse(
+                            accessToken = result.data.accessToken,
+                            refreshToken = result.data.refreshToken
+                        )
                     )
-                )
+                }
+                is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
             }
-            is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
         }
     }
 

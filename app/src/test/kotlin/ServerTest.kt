@@ -6,6 +6,7 @@ import com.kevinfreyap.plugins.configureRateLimit
 import com.kevinfreyap.plugins.configureResources
 import com.kevinfreyap.plugins.configureSerialization
 import com.kevinfreyap.plugins.configureSockets
+import domain.usecase.DeleteExpiredTokensUseCase
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.http.HttpHeaders
@@ -37,6 +38,7 @@ class ServerTest {
                 modules(
                     module {
                         single<JwtConfig> {mockk(relaxed = true)}
+                        single<DeleteExpiredTokensUseCase> {mockk(relaxed = true)}
                     }
                 )
             }
@@ -48,6 +50,7 @@ class ServerTest {
             configureValidation()
             configureSockets()
             configureSecurity()
+            configureBackgroundJobs()
             configureRouting()
         }
 

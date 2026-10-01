@@ -26,5 +26,17 @@ fun Application.configureRateLimit() {
 
             requestKey { call -> call.request.origin.remoteHost }
         }
+
+        register (RateLimitName("auth_limit")) {
+            rateLimiter(
+                limit = 10,
+                refillPeriod = 60.seconds,
+            )
+
+            requestKey { call ->
+                call.request.headers["X-Forwarded-For"] ?: call.request.local.remoteHost
+            }
+            
+        }
     }
 }

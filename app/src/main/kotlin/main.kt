@@ -26,6 +26,7 @@ fun Application.module() {
     configureValidation()
     configureSockets()
     configureSecurity()
+    configureBackgroundJobs()
 
     configureRouting()
 }

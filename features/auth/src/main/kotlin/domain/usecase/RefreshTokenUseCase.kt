@@ -3,6 +3,7 @@ package domain.usecase
 import domain.model.AuthTokens
 import domain.repository.AuthRepository
 import domain.security.TokenProvider
+import domain.util.hashWithSHA256
 import result.DomainResult
 import result.ErrorType
 
@@ -11,7 +12,7 @@ class RefreshTokenUseCase (
     private val tokenProvider: TokenProvider
 ) {
     suspend operator fun invoke(providedRefreshToken: String): DomainResult<AuthTokens> {
-        val savedToken = authRepository.findRefreshToken(providedRefreshToken)
+        val savedToken = authRepository.findRefreshToken(providedRefreshToken.hashWithSHA256())
             ?: return DomainResult.Error("Invalid or expired refresh token", ErrorType.UNAUTHORIZED)
 
         if (savedToken.isRevoked) {
@@ -32,7 +33,7 @@ class RefreshTokenUseCase (
 
         authRepository.saveRefreshToken(
             userId = savedToken.userId,
-            token = newRefreshToken,
+            token = newRefreshToken.hashWithSHA256(),
             expiresAt = newExpiresAt
         )
 
