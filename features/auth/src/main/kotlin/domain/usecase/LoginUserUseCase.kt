@@ -5,6 +5,7 @@ import domain.model.UserSession
 import domain.repository.AuthRepository
 import domain.security.PasswordHasher
 import domain.security.TokenProvider
+import domain.util.hashWithSHA256
 import domain.validation.ValidationRulesAuth
 import result.DomainResult
 import result.ErrorType
@@ -55,7 +56,7 @@ class LoginUserUseCase (
 
         authRepository.saveRefreshToken(
             userId = user.userId,
-            token = refreshToken,
+            token = refreshToken.hashWithSHA256(),
             expiresAt = expiresAt
         )
 

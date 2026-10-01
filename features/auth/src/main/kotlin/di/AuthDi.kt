@@ -7,6 +7,7 @@ import domain.repository.AuthRepository
 import domain.security.PasswordHasher
 import domain.security.TokenProvider
 import domain.usecase.AuthUseCases
+import domain.usecase.DeleteExpiredTokensUseCase
 import domain.usecase.LoginUserUseCase
 import domain.usecase.LogoutUseCase
 import domain.usecase.RefreshTokenUseCase
@@ -46,4 +47,6 @@ fun authModule(config: ApplicationConfig) = module {
             logout = get(),
         )
     }
+
+    factory { DeleteExpiredTokensUseCase(get()) }
 }
