@@ -12,7 +12,9 @@ class RefreshTokenUseCase (
     private val tokenProvider: TokenProvider
 ) {
     suspend operator fun invoke(providedRefreshToken: String): DomainResult<AuthTokens> {
-        val savedToken = authRepository.findRefreshToken(providedRefreshToken.hashWithSHA256())
+        val hashedToken = providedRefreshToken.hashWithSHA256()
+
+        val savedToken = authRepository.findRefreshToken(hashedToken)
             ?: return DomainResult.Error("Invalid or expired refresh token", ErrorType.UNAUTHORIZED)
 
         if (savedToken.isRevoked) {
@@ -21,11 +23,11 @@ class RefreshTokenUseCase (
         }
 
         if (System.currentTimeMillis() > savedToken.expiresAt) {
-            authRepository.revokeRefreshToken(providedRefreshToken)
+            authRepository.revokeRefreshToken(hashedToken)
             return DomainResult.Error("Refresh token expired", ErrorType.UNAUTHORIZED)
         }
 
-        authRepository.revokeRefreshToken(providedRefreshToken)
+        authRepository.revokeRefreshToken(hashedToken)
 
         val newAccessToken = tokenProvider.generateAccessToken(savedToken.userId.value)
         val newRefreshToken = tokenProvider.generateRefreshToken()
