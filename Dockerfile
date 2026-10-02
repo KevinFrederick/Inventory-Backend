@@ -14,4 +14,4 @@ RUN addgroup --system ktor && \
 RUN mkdir /app && chown ktoruser:ktor /app
 COPY --chown=ktoruser:ktor --from=build /home/gradle/src/app/build/libs/*-all.jar /app/ktor-backend.jar
 USER ktoruser
-ENTRYPOINT ["java", "-jar", "/app/ktor-backend.jar"]
+ENTRYPOINT ["java", "-Djava.io.tmpdir=/tmp", "-jar", "/app/ktor-backend.jar"]

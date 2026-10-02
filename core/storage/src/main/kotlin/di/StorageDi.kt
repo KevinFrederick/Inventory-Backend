@@ -2,16 +2,17 @@ package di
 
 import data.MinioImageStorageService
 import domain.ImageStorageService
+import io.ktor.server.config.ApplicationConfig
 import io.minio.MinioClient
 import org.koin.dsl.module
 import util.getSecret
 
-val storageModule = module {
+fun storageModule (config: ApplicationConfig) = module {
     single {
         MinioClient.builder()
-            .endpoint(System.getenv("MINIO_URL") ?: "http://localhost:9000" )
+            .endpoint(config.property("minio.url").getString())
             .credentials(
-                System.getenv("MINIO_ROOT_USER") ?: "admin",
+                config.property("minio.accessKey").getString(),
                 getSecret("minio_pass","MINIO_ROOT_PASS"),
             )
             .build()
@@ -20,7 +21,7 @@ val storageModule = module {
     single<ImageStorageService> (createdAtStart = true) {
         MinioImageStorageService(
             minioClient = get(),
-            publicBaseUrl = System.getenv("MINIO_PUBLIC_URL") ?: "http://localhost:9000",
+            publicBaseUrl = config.propertyOrNull("minio.publicUrl")?.getString() ?: "http://localhost:9000",
             bucketName = "product"
         )
     }

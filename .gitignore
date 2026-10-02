@@ -31,6 +31,7 @@ local.properties
 application-local.conf
 *secrets*.properties
 secrets/
+secrets.conf
 
 # OS specific files
 .DS_Store
