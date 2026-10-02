@@ -47,24 +47,28 @@ For security, passwords and tokens are not stored in environment variables. You 
 2. Create the following files inside the secrets directory and paste your credentials into them (no extra spaces or newlines):
 * **secrets/db_pass.txt** (Your PostgreSQL password)
 * **secrets/minio_pass.txt** (Your MinIO root password)
+* **secrets/jwt_secret.txt** (Your secure JWT signing key)
+* **secrets/auth_pepper.txt** (Your secure password hashing pepper)
 * **secrets/tunnel_token.txt** *(Optional: Your Cloudflare Tunnel token. If you are not using Cloudflare, just leave this file empty so Docker doesn't throw a missing file error).*
 
 ### Step 2: Configure Environment Variables
-The application requires specific environment variables to connect to the infrastructure.
+The application uses a `.env` file to inject non-sensitive configuration into the containers.
 1. Copy the `.env.example` file and rename it to `.env`.
 2. Ensure the values match your local Docker setup:
 ```env
 # Database Configuration
-POSTGRES_DB=inventory_db
-POSTGRES_JDBC_URL=jdbc:postgresql://postgres-db:5432/inventory_db
-POSTGRES_USER=admin
-POSTGRES_PASS=secret
+POSTGRES_DB = inventory_db
+POSTGRES_USER = admin
+POSTGRES_JDBC_URL = jdbc:postgresql://postgres-db:5432/inventory_db?reWriteBatchedInserts=true
 
 # MinIO Configuration
-MINIO_URL=http://minio:9000
-MINIO_PUBLIC_URL=https://your-cloudflare-domain # Or http://localhost:9000 (local development)
-MINIO_ROOT_USER=minioadmin
-MINIO_ROOT_PASS=minioadmin
+MINIO_URL = http://minio:9000
+MINIO_PUBLIC_URL = https://your-cloudflare-domain
+MINIO_ROOT_USER = admin
+
+# JWT Configuration
+JWT_ISSUER = your-issuer
+JWT_AUDIENCE = your-audience
 ```
 
 ### Step 3: Build and Run the Stack

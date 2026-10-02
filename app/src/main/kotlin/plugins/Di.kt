@@ -13,8 +13,8 @@ fun Application.configureDI() {
     install(Koin) {
         slf4jLogger()
         modules(
-            databaseModule,
-            storageModule,
+            databaseModule(environment.config),
+            storageModule(environment.config),
             productModule,
             authModule(environment.config)
         )

@@ -14,12 +14,13 @@ import domain.usecase.RefreshTokenUseCase
 import domain.usecase.RegisterUseCase
 import io.ktor.server.config.ApplicationConfig
 import org.koin.dsl.module
+import util.getSecret
 
 fun authModule(config: ApplicationConfig) = module {
     //// Api Layer
     single {
         JwtConfig(
-            secret = config.property("jwt.secret").getString(),
+            secret = getSecret("jwt_secret", "JWT_SECRET"),
             issuer = config.property("jwt.issuer").getString(),
             audience = config.property("jwt.audience").getString(),
         )
@@ -28,7 +29,7 @@ fun authModule(config: ApplicationConfig) = module {
     //// Data Layer
     single<AuthRepository> { AuthRepositoryImpl() }
     single<PasswordHasher> {
-        val pepper = config.property("auth.pepper").getString()
+        val pepper = getSecret("auth_pepper", "AUTH_PEPPER_SECRET")
         Argon2PasswordHasher(pepper)
     }
 
