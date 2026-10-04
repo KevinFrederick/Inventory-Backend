@@ -1,8 +1,8 @@
-package data.mapper
+package mapper
 
-import data.table.auth.UserTable
-import domain.model.User
-import domain.model.UserId
+import data.table.user.UserTable
+import model.User
+import model.UserId
 import org.jetbrains.exposed.v1.core.ResultRow
 
 fun ResultRow.toDomain(): User =

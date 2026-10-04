@@ -27,6 +27,5 @@ include(":core:domain")
 include(":core:database")
 include(":core:storage")
 include(":features:product")
-
-
 include("features:auth")
+include("features:user")

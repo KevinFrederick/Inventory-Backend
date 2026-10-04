@@ -1,8 +1,8 @@
 package domain.usecase
 
 import domain.model.AuthTokens
-import domain.model.User
-import domain.model.UserId
+import model.User
+import model.UserId
 import domain.model.UserSession
 import domain.repository.AuthRepository
 import domain.security.PasswordHasher

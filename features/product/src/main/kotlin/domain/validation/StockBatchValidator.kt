@@ -57,7 +57,7 @@ class StockBatchValidator (
         val errors = mutableListOf<String>()
 
         errors.addAll(
-            validateExpirationDate(
+            ValidationRulesProduct.validateExpirationDate(
                 item = item,
                 getId = getId,
                 getCreatedAt = getCreatedAt,

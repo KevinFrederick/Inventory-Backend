@@ -1,4 +1,4 @@
-package domain.model
+package model
 
 @JvmInline
 value class UserId(val value: String)

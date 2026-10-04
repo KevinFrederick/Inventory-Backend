@@ -1,7 +1,7 @@
 package api.mapper
 
 import api.dto.response.UserResponse
-import domain.model.User
+import model.User
 
 fun User.toResponse(): UserResponse =
     UserResponse(

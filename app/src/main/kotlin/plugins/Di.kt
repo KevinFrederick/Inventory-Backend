@@ -8,6 +8,7 @@ import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
 import di.productModule
 import di.storageModule
+import di.userModule
 
 fun Application.configureDI() {
     install(Koin) {
@@ -16,7 +17,8 @@ fun Application.configureDI() {
             databaseModule(environment.config),
             storageModule(environment.config),
             productModule,
-            authModule(environment.config)
+            authModule(environment.config),
+            userModule
         )
     }
 }

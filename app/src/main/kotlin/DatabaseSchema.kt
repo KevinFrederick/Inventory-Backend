@@ -1,9 +1,9 @@
 package com.kevinfreyap
 
-import data.table.auth.GroupTable
+import data.table.user.GroupTable
 import data.table.auth.RefreshTokenTable
-import data.table.auth.UserGroupTable
-import data.table.auth.UserTable
+import data.table.user.UserGroupTable
+import data.table.user.UserTable
 import data.table.product.CategoryTable
 import data.table.product.DeletedTable
 import data.table.product.LocationTable

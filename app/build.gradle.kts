@@ -17,6 +17,7 @@ dependencies {
     implementation(project(":core:storage"))
     implementation(project(":features:product"))
     implementation(project(":features:auth"))
+    implementation(project(":features:user"))
 
     implementation(ktorLibs.serialization.kotlinx.json)
     implementation(ktorLibs.server.resources)

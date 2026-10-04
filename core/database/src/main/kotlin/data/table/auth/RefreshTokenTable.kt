@@ -1,5 +1,6 @@
 package data.table.auth
 
+import data.table.user.UserTable
 import org.jetbrains.exposed.v1.core.ReferenceOption
 import org.jetbrains.exposed.v1.core.Table
 

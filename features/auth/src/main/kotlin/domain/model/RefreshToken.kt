@@ -1,5 +1,7 @@
 package domain.model
 
+import model.UserId
+
 @JvmInline
 value class RefreshTokenId(val value: String)
 

@@ -1,4 +1,4 @@
-package data.table.auth
+package data.table.user
 
 import org.jetbrains.exposed.v1.core.ReferenceOption
 import org.jetbrains.exposed.v1.core.Table

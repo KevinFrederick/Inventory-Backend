@@ -1,8 +1,8 @@
 package domain.repository
 
 import domain.model.RefreshToken
-import domain.model.User
-import domain.model.UserId
+import model.User
+import model.UserId
 import result.DomainResult
 
 interface AuthRepository {
