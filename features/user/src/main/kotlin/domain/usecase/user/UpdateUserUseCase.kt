@@ -13,13 +13,12 @@ class UpdateUserUseCase (
 ) {
     suspend operator fun invoke(
         userId: UserId,
-        name: String,
+        name: String?,
         avatarUrl: String?,
         phoneNumber: String?,
         jobTitle: String?,
         locale: String?,
         timeZone: String?,
-        lastUpdated: Long
     ): DomainResult<User> {
         when(
             val userResult = userRepository.getUserById(userId)
@@ -30,13 +29,13 @@ class UpdateUserUseCase (
                     ?: return DomainResult.Error("User not found", ErrorType.NOT_FOUND)
 
                 val updatedUser = existingUser.copy(
-                    name = name,
+                    name = name?: existingUser.name,
                     avatarUrl = avatarUrl,
                     phoneNumber = phoneNumber,
                     jobTitle = jobTitle,
                     locale = locale,
                     timeZone = timeZone,
-                    lastUpdated = lastUpdated
+                    lastUpdated = System.currentTimeMillis(),
                 )
 
                 when(

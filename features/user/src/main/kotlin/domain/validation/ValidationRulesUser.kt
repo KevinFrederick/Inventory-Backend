@@ -3,34 +3,8 @@ package domain.validation
 import java.time.ZoneId
 
 object ValidationRulesUser {
-    private val EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]+$".toRegex()
     private val PHONE_REGEX = "^\\+?[1-9]\\d{1,14}$".toRegex()
     private val LOCALE_REGEX = "^[a-z]{2}(-[A-Z]{2})?$".toRegex()
-
-    fun <T> validateEmail(
-        item: T,
-        getId: (T) -> String,
-        getValue: (T) -> String
-    ): List<String> {
-        val value = getValue(item)
-        val errors = mutableListOf<String>()
-
-        if (value.isBlank()) {
-            errors.add(
-                "${getId(item)}: Email cannot be empty."
-            )
-        } else if (value.length > 255) {
-            errors.add(
-                "${getId(item)}: Email must not exceed 255 characters."
-            )
-        } else if (!value.matches(EMAIL_REGEX)) {
-            errors.add(
-                "${getId(item)}: Invalid email format."
-            )
-        }
-
-        return errors
-    }
 
     fun <T> validatePhoneNumber(
         item: T,

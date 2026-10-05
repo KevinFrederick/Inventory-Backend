@@ -1,14 +1,16 @@
 package domain.usecase.user_group
 
-import domain.model.AppRole
-import domain.model.GroupId
+import model.AppRole
+import model.GroupId
 import domain.repository.GroupRepository
 import model.UserId
+import repository.UserRoleProvider
 import result.DomainResult
 import result.ErrorType
 
 class RemoveMemberUseCase (
     private val groupRepository: GroupRepository,
+    private val userRoleProvider: UserRoleProvider
 ) {
     suspend operator fun invoke(
         requesterId: UserId,
@@ -18,7 +20,7 @@ class RemoveMemberUseCase (
 
         // Leaving
         if (requesterId == targetUserId) {
-            val userRole = groupRepository.getUserRoleInGroup(requesterId, groupId)
+            val userRole = userRoleProvider.getUserRole(requesterId, groupId)
                 ?: return DomainResult.Error("You are not a member of this group.", ErrorType.NOT_FOUND)
 
             if (userRole == AppRole.OWNER) {
@@ -29,14 +31,14 @@ class RemoveMemberUseCase (
         }
 
         // Removing
-        val requesterRole = groupRepository.getUserRoleInGroup(requesterId, groupId)
+        val requesterRole = userRoleProvider.getUserRole(requesterId, groupId)
             ?: return DomainResult.Error("You are not a member of this group.", ErrorType.FORBIDDEN)
 
         if (requesterRole == AppRole.MEMBER) {
             return DomainResult.Error("Only owner and admins can remove members", ErrorType.FORBIDDEN)
         }
 
-        val targetRole = groupRepository.getUserRoleInGroup(targetUserId, groupId)
+        val targetRole = userRoleProvider.getUserRole(targetUserId, groupId)
             ?: return DomainResult.Error("Target user not a member of this group.", ErrorType.NOT_FOUND)
 
         if (requesterRole == AppRole.ADMIN && (targetRole == AppRole.OWNER || targetRole == AppRole.ADMIN)) {

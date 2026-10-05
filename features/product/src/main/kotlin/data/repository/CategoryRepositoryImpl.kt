@@ -8,6 +8,8 @@ import data.util.EntityType
 import domain.model.Category
 import domain.model.CategoryId
 import domain.repository.CategoryRepository
+import model.GroupId
+import org.jetbrains.exposed.v1.core.and
 import result.DomainResult
 import result.ErrorType
 import org.jetbrains.exposed.v1.core.eq
@@ -16,12 +18,16 @@ import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.update
+import org.slf4j.LoggerFactory
 
 class CategoryRepositoryImpl: CategoryRepository {
-    override suspend fun getAllCategory(): DomainResult<List<Category>> = dbQuery {
+    private val logger = LoggerFactory.getLogger(CategoryRepositoryImpl::class.java)
+
+    override suspend fun getAllCategory(groupId: GroupId): DomainResult<List<Category>> = dbQuery {
         try {
             val categoriesRows = CategoryTable
                 .selectAll()
+                .where { CategoryTable.groupId eq groupId.value }
                 .toList()
 
             val categories = categoriesRows.map { row ->
@@ -30,31 +36,34 @@ class CategoryRepositoryImpl: CategoryRepository {
 
             DomainResult.Success(categories)
         } catch (e: Exception) {
+            logger.error("Error while fetching categories", e)
             DomainResult.Error(e.message ?: "Unknown error", ErrorType.UNKNOWN)
         }
     }
 
-    override suspend fun getCategoryById(categoryId: CategoryId): DomainResult<Category?> = dbQuery {
+    override suspend fun getCategoryById(categoryId: CategoryId, groupId: GroupId): DomainResult<Category> = dbQuery {
         try {
             val categoryRow = CategoryTable
                 .selectAll()
-                .where { CategoryTable.categoryId eq categoryId.value }
+                .where { (CategoryTable.categoryId eq categoryId.value) and (CategoryTable.groupId eq groupId.value) }
                 .singleOrNull()
 
-            if (categoryRow == null) return@dbQuery DomainResult.Success(null)
+            if (categoryRow == null) return@dbQuery DomainResult.Error("Category not found", ErrorType.NOT_FOUND)
 
             val category = categoryRow.toCategory()
 
             DomainResult.Success(category)
         } catch (e: Exception) {
+            logger.error("Error while fetching category", e)
             DomainResult.Error(e.message ?: "Unknown error", ErrorType.UNKNOWN)
         }
     }
 
-    override suspend fun insertCategory(category: Category): DomainResult<Unit> = dbQuery {
+    override suspend fun insertCategory(category: Category, groupId: GroupId): DomainResult<Unit> = dbQuery {
         try {
             CategoryTable.insert {
                 it[categoryId] = category.categoryId.value
+                it[this.groupId] = groupId.value
                 it[name] = category.name
                 it[description] = category.description
                 it[createdAt] = category.createdAt
@@ -64,6 +73,7 @@ class CategoryRepositoryImpl: CategoryRepository {
 
             DomainResult.Success(Unit)
         } catch (e: ExposedSQLException) {
+            logger.error("Error while inserting category", e)
             val errorMessage = e.message ?: ""
 
             when{
@@ -75,9 +85,11 @@ class CategoryRepositoryImpl: CategoryRepository {
         }
     }
 
-    override suspend fun updateCategory(category: Category): DomainResult<Unit> = dbQuery {
+    override suspend fun updateCategory(category: Category, groupId: GroupId): DomainResult<Unit> = dbQuery {
         try {
-            val updatedRowsCount = CategoryTable.update ({ CategoryTable.categoryId eq category.categoryId.value }) {
+            val updatedRowsCount = CategoryTable.update ({
+                (CategoryTable.categoryId eq category.categoryId.value) and (CategoryTable.groupId eq groupId.value)
+            }) {
                 it[name] = category.name
                 it[description] = category.description
                 it[lastUpdated] = category.lastUpdated
@@ -88,6 +100,7 @@ class CategoryRepositoryImpl: CategoryRepository {
 
             DomainResult.Success(Unit)
         } catch (e: ExposedSQLException) {
+            logger.error("Error while updating category", e)
             val errorMessage = e.message ?: ""
 
             when{
@@ -99,20 +112,24 @@ class CategoryRepositoryImpl: CategoryRepository {
         }
     }
 
-    override suspend fun deleteCategory(categoryId: CategoryId): DomainResult<Unit> = dbQuery {
+    override suspend fun deleteCategory(categoryId: CategoryId, groupId: GroupId): DomainResult<Unit> = dbQuery {
         try {
-            val deletedRowsCount = CategoryTable.deleteWhere { CategoryTable.categoryId eq categoryId.value }
+            val deletedRowsCount = CategoryTable.deleteWhere {
+                (CategoryTable.categoryId eq categoryId.value) and (CategoryTable.groupId eq groupId.value)
+            }
 
             if (deletedRowsCount == 0) return@dbQuery DomainResult.Error("Category Not Found", ErrorType.NOT_FOUND)
 
             DeletedTable.insert {
                 it[entityId] = categoryId.value
+                it[this.groupId] = groupId.value
                 it[entityType] = EntityType.CATEGORY.name
                 it[deletedAt] = System.currentTimeMillis()
             }
 
             DomainResult.Success(Unit)
         } catch (e: Exception) {
+            logger.error("Error while deleting category", e)
             DomainResult.Error(e.message ?: "Unknown error", ErrorType.UNKNOWN)
         }
     }

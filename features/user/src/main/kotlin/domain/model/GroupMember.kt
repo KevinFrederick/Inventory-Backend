@@ -1,5 +1,6 @@
 package domain.model
 
+import model.AppRole
 import model.UserId
 
 data class GroupMember(

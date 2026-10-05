@@ -4,16 +4,20 @@ import domain.model.ProductId
 import domain.repository.ProductRepository
 import result.DomainResult
 import domain.ImageStorageService
+import model.GroupId
 
 class DeleteProductImageUseCase(
     private val imageStorageService: ImageStorageService,
     private val repository: ProductRepository
 ) {
-    suspend operator fun invoke(productId: ProductId): DomainResult<Unit> {
+    suspend operator fun invoke(
+        productId: ProductId,
+        groupId: GroupId,
+    ): DomainResult<Unit> {
         val imageResult = when (
-            val productResult = repository.getProductById(productId)
+            val productResult = repository.getProductById(productId, groupId)
         ) {
-            is DomainResult.Success -> productResult.data?.imageUri
+            is DomainResult.Success -> productResult.data.imageUri
             is DomainResult.Error -> return productResult
         }
 
@@ -26,6 +30,7 @@ class DeleteProductImageUseCase(
             is DomainResult.Success -> {
                 repository.deleteProductImage(
                     productId = productId,
+                    groupId = groupId,
                     updatedAt = System.currentTimeMillis(),
                 )
             }

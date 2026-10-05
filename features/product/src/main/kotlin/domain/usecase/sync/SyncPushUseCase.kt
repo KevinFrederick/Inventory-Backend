@@ -1,5 +1,6 @@
 package domain.usecase.sync
 
+import model.GroupId
 import domain.model.sync.SyncPayload
 import domain.model.sync.SyncPushResponse
 import domain.repository.SyncRepository
@@ -16,7 +17,10 @@ class SyncPushUseCase (
     private val productValidator: ProductValidator,
     private val stockBatchValidator: StockBatchValidator
 ) {
-    suspend operator fun invoke(syncPayload: SyncPayload): DomainResult<SyncPushResponse> {
+    suspend operator fun invoke(
+        syncPayload: SyncPayload,
+        groupId: GroupId,
+    ): DomainResult<SyncPushResponse> {
         val allCategories = syncPayload.createdCategories + syncPayload.updatedCategories
         val allLocations = syncPayload.createdLocations + syncPayload.updatedLocations
         val allProducts = syncPayload.createdProduct + syncPayload.updatedProduct
@@ -58,6 +62,6 @@ class SyncPushUseCase (
             }
         }
 
-        return repository.pushSync(syncPayload)
+        return repository.pushSync(syncPayload, groupId)
     }
 }

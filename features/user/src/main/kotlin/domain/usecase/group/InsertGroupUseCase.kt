@@ -1,13 +1,15 @@
 package domain.usecase.group
 
-import domain.model.AppRole
 import domain.model.Group
-import domain.model.GroupId
+import model.AppRole
+import model.GroupId
 import domain.model.UserGroup
 import domain.repository.GroupRepository
 import domain.validation.GroupValidator
 import model.UserId
 import result.DomainResult
+import util.cleanInlineSpaces
+import util.toTitleCase
 import java.util.UUID
 
 class InsertGroupUseCase (
@@ -20,11 +22,12 @@ class InsertGroupUseCase (
         description: String?,
         address: String?,
     ): DomainResult<Group> {
+        val sanitizedName = name.cleanInlineSpaces().toTitleCase()
         val timestamp = System.currentTimeMillis()
 
         val group = Group(
             groupId = GroupId("Group-${UUID.randomUUID()}"),
-            name = name,
+            name = sanitizedName,
             description = description,
             address = address,
             createdAt = timestamp,

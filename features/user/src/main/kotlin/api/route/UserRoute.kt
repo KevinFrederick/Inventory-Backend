@@ -2,7 +2,7 @@ package api.route
 
 import api.dto.request.UpdateProfileRequest
 import api.mapper.toResponse
-import api.util.userId
+import util.userId
 import domain.usecase.user.UserUseCases
 import io.ktor.http.HttpStatusCode
 import io.ktor.resources.Resource
@@ -29,6 +29,7 @@ fun Route.userRoute() {
     val useCases: UserUseCases by inject()
 
     authenticate("auth-jwt") {
+        // Get user profile
         get<UserResource> {
             val userId = call.userId
                 ?: return@get call.respond(HttpStatusCode.Unauthorized)
@@ -41,6 +42,7 @@ fun Route.userRoute() {
             }
         }
 
+        // Update profile
         rateLimit (RateLimitName("upload_limit")) {
             put<UserResource> {
                 val userId = call.userId
@@ -57,7 +59,6 @@ fun Route.userRoute() {
                         jobTitle = userRequest.jobTitle,
                         locale = userRequest.locale,
                         timeZone = userRequest.timeZone,
-                        lastUpdated = userRequest.lastUpdated,
                     )
                 ) {
                     is DomainResult.Success -> call.respond(HttpStatusCode.OK, result.data.toResponse())
@@ -66,6 +67,7 @@ fun Route.userRoute() {
             }
         }
 
+        // Delete User
         delete<UserResource> {
             val userId = call.userId
                 ?: return@delete call.respond(HttpStatusCode.Unauthorized)

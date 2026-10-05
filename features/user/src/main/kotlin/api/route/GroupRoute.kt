@@ -1,16 +1,16 @@
 package api.route
 
 import api.dto.request.AddMemberRequest
-import api.dto.request.GroupRequest
+import api.dto.request.InsertGroupRequest
+import api.dto.request.UpdateGroupRequest
 import api.dto.request.UpdateMemberRoleRequest
 import api.mapper.toResponse
-import api.util.userId
-import domain.model.AppRole
-import domain.model.GroupId
+import util.userId
+import model.AppRole
+import model.GroupId
 import domain.usecase.group.GroupUseCases
 import domain.usecase.user_group.UserGroupUseCases
 import io.ktor.http.HttpStatusCode
-import io.ktor.resources.Resource
 import io.ktor.server.auth.authenticate
 import io.ktor.server.plugins.ratelimit.RateLimitName
 import io.ktor.server.plugins.ratelimit.rateLimit
@@ -21,30 +21,11 @@ import io.ktor.server.resources.post
 import io.ktor.server.response.respond
 import io.ktor.server.resources.get
 import io.ktor.server.resources.put
-import kotlinx.serialization.Serializable
 import model.UserId
 import org.koin.ktor.ext.inject
+import resource.GroupResource
 import result.DomainResult
 import util.toHttpStatusCode
-
-@Serializable
-@Resource("/groups")
-class GroupResource {
-
-    @Serializable
-    @Resource("{id}")
-    class Id (val parent: GroupResource, val id: String) {
-
-        @Serializable
-        @Resource("members")
-        class Members(val parent: Id) {
-
-            @Serializable
-            @Resource("{memberId}")
-            class Member (val parent: Members, val memberId: String)
-        }
-    }
-}
 
 fun Route.groupRoute() {
     val groupUseCases: GroupUseCases by inject()
@@ -57,7 +38,7 @@ fun Route.groupRoute() {
                 val requesterId = call.userId
                     ?: return@post call.respond(HttpStatusCode.Unauthorized)
 
-                val groupRequest = call.receive<GroupRequest>()
+                val groupRequest = call.receive<InsertGroupRequest>()
 
                 when(
                     val result = groupUseCases.insertGroup(
@@ -78,7 +59,7 @@ fun Route.groupRoute() {
             post<GroupResource.Id.Members>{ request ->
                 val requesterId = call.userId
                     ?: return@post call.respond(HttpStatusCode.Unauthorized)
-                val groupId = request.parent.id
+                val groupId = request.parent.groupId
 
                 val memberRequest = call.receive<AddMemberRequest>()
                 val assignRole = runCatching { AppRole.valueOf(memberRequest.role) }
@@ -102,7 +83,7 @@ fun Route.groupRoute() {
         get<GroupResource.Id> {request ->
             val requesterId = call.userId
                 ?: return@get call.respond(HttpStatusCode.Unauthorized)
-            val groupId = request.id
+            val groupId = request.groupId
 
             when(
                 val result = groupUseCases.getGroupById(
@@ -132,7 +113,7 @@ fun Route.groupRoute() {
         get<GroupResource.Id.Members> { request ->
             val requesterId = call.userId
                 ?: return@get call.respond(HttpStatusCode.Unauthorized)
-            val groupId = request.parent.id
+            val groupId = request.parent.groupId
 
             when(
                 val result = userGroupUseCases.getGroupMembers(
@@ -150,8 +131,8 @@ fun Route.groupRoute() {
             val requesterId = call.userId
                 ?: return@put call.respond(HttpStatusCode.Unauthorized)
 
-            val groupId = request.id
-            val groupRequest = call.receive<GroupRequest>()
+            val groupId = request.groupId
+            val groupRequest = call.receive<UpdateGroupRequest>()
 
             when(
                 val result = groupUseCases.updateGroup(
@@ -172,7 +153,7 @@ fun Route.groupRoute() {
             val requesterId = call.userId
                 ?: return@put call.respond(HttpStatusCode.Unauthorized)
 
-            val groupId = request.parent.parent.id
+            val groupId = request.parent.parent.groupId
             val targetedUserId = request.memberId
 
             val memberRequest = call.receive<UpdateMemberRoleRequest>()
@@ -203,7 +184,7 @@ fun Route.groupRoute() {
             val requesterId = call.userId
                 ?: return@delete call.respond(HttpStatusCode.Unauthorized)
 
-            val groupId = request.id
+            val groupId = request.groupId
 
             when(
                 val result = groupUseCases.deleteGroup(
@@ -221,7 +202,7 @@ fun Route.groupRoute() {
             val requesterId = call.userId
                 ?: return@delete call.respond(HttpStatusCode.Unauthorized)
 
-            val groupId = request.parent.parent.id
+            val groupId = request.parent.parent.groupId
             val targetedUserId = request.memberId
 
             when(

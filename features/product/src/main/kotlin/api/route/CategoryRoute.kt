@@ -20,47 +20,84 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.resources.post
 import kotlinx.serialization.Serializable
+import model.AppRole
+import model.GroupId
 import org.koin.ktor.ext.inject
+import resource.GroupResource
+import usecase.VerifyUserGroupRoleUseCase
+import util.verifyGroupAccess
 
 @Serializable
-@Resource("/category")
-class CategoryResource {
+@Resource("category")
+class CategoryResource (val parent: GroupResource.Id) {
     @Serializable
-    @Resource("{id}")
-    class Id(val parent: CategoryResource = CategoryResource(), val id: String)
+    @Resource("{categoryId}")
+    class Id(val parent: CategoryResource, val categoryId: String)
 }
 
 fun Route.categoryRoutes() {
     val useCases: CategoryUseCases by inject()
+    val verifyUserGroupRoleUseCase: VerifyUserGroupRoleUseCase by inject()
 
     authenticate("auth-jwt") {
-        get <CategoryResource> {
+        // Get all category for current group
+        get <CategoryResource> { request ->
+            val groupId = GroupId(request.parent.groupId)
+
+            call.verifyGroupAccess(
+                groupId = groupId,
+                verifyUserGroupRole = verifyUserGroupRoleUseCase,
+            ) ?: return@get
+
             when(
-                val result = useCases.getAllCategory()
+                val result = useCases.getAllCategory(
+                    groupId = groupId
+                )
             ) {
                 is DomainResult.Success -> call.respond(HttpStatusCode.OK, result.data.map { it.toResponse() })
                 is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
             }
         }
 
+        // Get category
         get <CategoryResource.Id> { request ->
-            val categoryId = CategoryId(request.id)
+            val groupId = GroupId(request.parent.parent.groupId)
+            val categoryId = CategoryId(request.categoryId)
+
+            call.verifyGroupAccess(
+                groupId = groupId,
+                verifyUserGroupRole = verifyUserGroupRoleUseCase,
+            ) ?: return@get
 
             when (
-                val result = useCases.getCategoryById(categoryId)
+                val result = useCases.getCategoryById(
+                    groupId = groupId,
+                    categoryId = categoryId
+                )
             ) {
                 is DomainResult.Success -> call.respond(HttpStatusCode.OK, result.data.toResponse())
                 is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
             }
         }
 
+        // Insert category
         rateLimit (RateLimitName("upload_limit")) {
-            post <CategoryResource> {
+            post <CategoryResource> { request ->
+                val groupId = GroupId(request.parent.groupId)
                 val categoryRequest = call.receive<CategoryRequest>()
                 val category = categoryRequest.toDomain()
 
+                call.verifyGroupAccess(
+                    groupId = groupId,
+                    verifyUserGroupRole = verifyUserGroupRoleUseCase,
+                    allowedRoles = listOf(AppRole.OWNER, AppRole.ADMIN)
+                ) ?: return@post
+
                 when(
-                    val result = useCases.insertCategory(category)
+                    val result = useCases.insertCategory(
+                        category = category,
+                        groupId = groupId
+                    )
                 ) {
                     is DomainResult.Success -> call.respond(HttpStatusCode.Created, category.toResponse())
                     is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
@@ -68,14 +105,26 @@ fun Route.categoryRoutes() {
             }
         }
 
+        // Update Category
         rateLimit (RateLimitName("upload_limit")) {
             put <CategoryResource.Id> { request ->
-                val categoryId = CategoryId(request.id)
+                val groupId = GroupId(request.parent.parent.groupId)
+                val categoryId = CategoryId(request.categoryId)
                 val categoryRequest = call.receive<CategoryRequest>()
                 val updatedCategory = categoryRequest.toDomain()
 
+                call.verifyGroupAccess(
+                    groupId = groupId,
+                    verifyUserGroupRole = verifyUserGroupRoleUseCase,
+                    allowedRoles = listOf(AppRole.OWNER, AppRole.ADMIN)
+                ) ?: return@put
+
                 when(
-                    val result = useCases.updateCategory(categoryId, updatedCategory)
+                    val result = useCases.updateCategory(
+                        categoryId = categoryId,
+                        groupId = groupId,
+                        category = updatedCategory
+                    )
                 ) {
                     is DomainResult.Success -> call.respond(HttpStatusCode.OK, updatedCategory.toResponse())
                     is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
@@ -83,11 +132,22 @@ fun Route.categoryRoutes() {
             }
         }
 
+        // Delete category
         delete <CategoryResource.Id> { request ->
-            val categoryId = CategoryId(request.id)
+            val groupId = GroupId(request.parent.parent.groupId)
+            val categoryId = CategoryId(request.categoryId)
+
+            call.verifyGroupAccess(
+                groupId = groupId,
+                verifyUserGroupRole = verifyUserGroupRoleUseCase,
+                allowedRoles = listOf(AppRole.OWNER, AppRole.ADMIN)
+            ) ?: return@delete
 
             when(
-                val result = useCases.deleteCategory(categoryId)
+                val result = useCases.deleteCategory(
+                    categoryId = categoryId,
+                    groupId = groupId
+                )
             ) {
                 is DomainResult.Success -> call.respond(HttpStatusCode.NoContent)
                 is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)

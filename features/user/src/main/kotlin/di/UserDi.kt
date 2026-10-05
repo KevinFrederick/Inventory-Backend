@@ -21,11 +21,15 @@ import domain.usecase.user_group.UpdateMemberRoleUseCase
 import domain.usecase.user_group.UserGroupUseCases
 import domain.validation.GroupValidator
 import domain.validation.UserValidator
+import org.koin.dsl.bind
+import org.koin.dsl.binds
 import org.koin.dsl.module
+import repository.UserRoleProvider
+import usecase.VerifyUserGroupRoleUseCase
 
 val userModule = module {
     single <UserRepository> { UserRepositoryImpl() }
-    single <GroupRepository> { GroupRepositoryImpl() }
+    single { GroupRepositoryImpl() } binds arrayOf(GroupRepository::class, UserRoleProvider::class)
 
     factory { UserValidator() }
     factory { GroupValidator() }
@@ -41,10 +45,10 @@ val userModule = module {
         )
     }
 
-    factory { GetGroupByIdUseCase(get()) }
+    factory { GetGroupByIdUseCase(get(), get()) }
     factory { InsertGroupUseCase(get(), get()) }
-    factory { UpdateGroupUseCase(get(), get()) }
-    factory { DeleteGroupUseCase(get()) }
+    factory { UpdateGroupUseCase(get(), get(), get()) }
+    factory { DeleteGroupUseCase(get(), get()) }
     factory {
         GroupUseCases(
             insertGroup = get(),
@@ -54,11 +58,11 @@ val userModule = module {
         )
     }
 
-    factory { GetGroupMembersUseCase(get()) }
+    factory { GetGroupMembersUseCase(get(), get()) }
     factory { GetGroupsForUserUseCase(get()) }
-    factory { AddUserToGroupUseCase(get(), get()) }
-    factory { UpdateMemberRoleUseCase(get()) }
-    factory { RemoveMemberUseCase(get()) }
+    factory { AddUserToGroupUseCase(get(), get(), get()) }
+    factory { UpdateMemberRoleUseCase(get(), get()) }
+    factory { RemoveMemberUseCase(get(), get()) }
     factory {
         UserGroupUseCases(
             getGroupMembers = get(),
@@ -68,4 +72,6 @@ val userModule = module {
             removeMember = get()
         )
     }
+
+    factory { VerifyUserGroupRoleUseCase(get()) }
 }

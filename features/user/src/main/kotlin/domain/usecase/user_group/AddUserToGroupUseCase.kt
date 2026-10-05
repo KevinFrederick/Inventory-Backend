@@ -1,19 +1,21 @@
 package domain.usecase.user_group
 
-import domain.model.AppRole
-import domain.model.GroupId
+import model.AppRole
+import model.GroupId
 import domain.model.UserGroup
 import domain.repository.GroupRepository
 import domain.repository.UserRepository
-import domain.validation.ValidationRulesUser
 import model.UserId
+import repository.UserRoleProvider
 import result.DomainResult
 import result.ErrorType
 import validation.ValidationResult
+import validation.ValidationRules
 
 class AddUserToGroupUseCase (
     private val groupRepository: GroupRepository,
     private val userRepository: UserRepository,
+    private val userRoleProvider: UserRoleProvider
 ) {
     suspend operator fun invoke(
         requesterId: UserId,
@@ -21,7 +23,7 @@ class AddUserToGroupUseCase (
         targetEmail: String,
         assignRole: AppRole
     ): DomainResult<Unit> {
-        val emailErrors = ValidationRulesUser.validateEmail(
+        val emailErrors = ValidationRules.validateEmail(
             item = targetEmail,
             getId = {"Target Email"},
             getValue = { it }
@@ -32,7 +34,7 @@ class AddUserToGroupUseCase (
         }
 
         // Check Requester Permissions
-        val requesterRole = groupRepository.getUserRoleInGroup(requesterId, groupId)
+        val requesterRole = userRoleProvider.getUserRole(requesterId, groupId)
             ?: return DomainResult.Error("User role not found", ErrorType.NOT_FOUND)
 
         if (requesterRole == AppRole.MEMBER) {

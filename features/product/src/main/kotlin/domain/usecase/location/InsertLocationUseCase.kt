@@ -1,5 +1,6 @@
 package domain.usecase.location
 
+import model.GroupId
 import domain.model.Location
 import domain.repository.LocationRepository
 import domain.validation.LocationValidator
@@ -9,7 +10,10 @@ class InsertLocationUseCase (
     private val repository: LocationRepository,
     private val locationValidator: LocationValidator
 ) {
-    suspend operator fun invoke(location: Location): DomainResult<Unit> {
+    suspend operator fun invoke(
+        location: Location,
+        groupId: GroupId
+    ): DomainResult<Unit> {
         when(
             val validationResult = locationValidator.validateLocation(location)
         ) {
@@ -17,6 +21,6 @@ class InsertLocationUseCase (
             is DomainResult.Success -> {}
         }
 
-        return repository.insertLocation(location)
+        return repository.insertLocation(location, groupId)
     }
 }

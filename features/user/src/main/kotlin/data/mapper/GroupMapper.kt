@@ -2,7 +2,7 @@ package data.mapper
 
 import data.table.user.GroupTable
 import domain.model.Group
-import domain.model.GroupId
+import model.GroupId
 import org.jetbrains.exposed.v1.core.ResultRow
 
 fun ResultRow.toDomain(): Group =

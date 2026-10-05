@@ -1,20 +1,22 @@
 package domain.usecase.group
 
-import domain.model.AppRole
-import domain.model.GroupId
+import model.AppRole
+import model.GroupId
 import domain.repository.GroupRepository
 import model.UserId
+import repository.UserRoleProvider
 import result.DomainResult
 import result.ErrorType
 
 class DeleteGroupUseCase (
     private val groupRepository: GroupRepository,
+    private val userRoleProvider: UserRoleProvider
 ) {
     suspend operator fun invoke(
         requesterId: UserId,
         groupId: GroupId
     ): DomainResult<Unit> {
-        val role = groupRepository.getUserRoleInGroup(requesterId, groupId)
+        val role = userRoleProvider.getUserRole(requesterId, groupId)
             ?: return DomainResult.Error("You are not a member of this group.", ErrorType.FORBIDDEN)
 
         if (role != AppRole.OWNER) {

@@ -62,7 +62,7 @@ val productModule = module {
     factory { GetProductByIdUseCase(get()) }
     factory { InsertProductUseCase(get(), get(), get(), get()) }
     factory { UpdateProductUseCase(get(), get(), get(), get()) }
-    factory { UploadProductImageUseCase(get())}
+    factory { UploadProductImageUseCase(get(), get())}
     factory { DeleteProductUseCase(get()) }
     factory { DeleteProductImageUseCase(get(), get()) }
     factory {
@@ -111,8 +111,8 @@ val productModule = module {
 
     // Stock Batch Use Cases
     factory { GetStockBatchByIdUseCase(get()) }
-    factory { InsertStockBatchUseCase(get(), get(), get()) }
-    factory { UpdateStockBatchUseCase(get(), get(), get()) }
+    factory { InsertStockBatchUseCase(get(), get(), get(), get()) }
+    factory { UpdateStockBatchUseCase(get(), get(), get(), get()) }
     factory { DeleteStockBatchUseCase(get()) }
     factory {
         StockBatchUseCases(

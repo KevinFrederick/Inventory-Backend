@@ -23,16 +23,21 @@ import io.ktor.server.resources.post
 import io.ktor.server.resources.put
 import io.ktor.utils.io.toByteArray
 import kotlinx.serialization.Serializable
+import model.AppRole
+import model.GroupId
 import org.koin.ktor.ext.inject
+import resource.GroupResource
 import result.DomainResult
+import usecase.VerifyUserGroupRoleUseCase
+import util.verifyGroupAccess
 
 @Serializable
-@Resource("/product")
-class ProductResource {
+@Resource("product")
+class ProductResource (val parent: GroupResource.Id) {
 
     @Serializable
-    @Resource("{id}")
-    class Id(val parent: ProductResource = ProductResource(), val id: String) {
+    @Resource("{productId}")
+    class Id(val parent: ProductResource, val productId: String) {
 
         @Serializable
         @Resource("image")
@@ -42,33 +47,67 @@ class ProductResource {
 
 fun Route.productRoutes() {
     val useCases: ProductUseCases by inject()
+    val verifyUserGroupRoleUseCase: VerifyUserGroupRoleUseCase by inject()
+
     authenticate("auth-jwt") {
-        get <ProductResource> {
+        // Get all products for current group
+        get <ProductResource> { request ->
+            val groupId = GroupId(request.parent.groupId)
+
+            call.verifyGroupAccess(
+                groupId = groupId,
+                verifyUserGroupRole = verifyUserGroupRoleUseCase,
+            ) ?: return@get
+
             when (
-                val result = useCases.getAllProduct()
+                val result = useCases.getAllProduct(
+                    groupId = groupId,
+                )
             ) {
                 is DomainResult.Success -> call.respond(HttpStatusCode.OK, result.data.map { it.toResponse() })
                 is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
             }
         }
 
+        // Get product
         get<ProductResource.Id> { request ->
-            val productId = ProductId(request.id)
+            val groupId = GroupId(request.parent.parent.groupId)
+            val productId = ProductId(request.productId)
+
+            call.verifyGroupAccess(
+                groupId = groupId,
+                verifyUserGroupRole = verifyUserGroupRoleUseCase,
+            ) ?: return@get
+
             when(
-                val result = useCases.getProductById(productId)
+                val result = useCases.getProductById(
+                    productId = productId,
+                    groupId = groupId,
+                )
             ) {
                 is DomainResult.Success -> call.respond(HttpStatusCode.OK, result.data.toResponse())
                 is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
             }
         }
 
+        // Insert Product
         rateLimit (RateLimitName("upload_limit")) {
-            post<ProductResource> {
+            post<ProductResource> { request ->
+                val groupId = GroupId(request.parent.groupId)
                 val productRequest = call.receive<ProductRequest>()
                 val productParams = productRequest.toDomainParams()
 
+                call.verifyGroupAccess(
+                    groupId = groupId,
+                    verifyUserGroupRole = verifyUserGroupRoleUseCase,
+                    allowedRoles = listOf(AppRole.OWNER, AppRole.ADMIN)
+                ) ?: return@post
+
                 when (
-                    val result = useCases.insertProduct(productParams)
+                    val result = useCases.insertProduct(
+                        productParams = productParams,
+                        groupId = groupId
+                    )
                 ) {
                     is DomainResult.Success -> call.respond(HttpStatusCode.Created, result.data.toResponse())
                     is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
@@ -76,14 +115,26 @@ fun Route.productRoutes() {
             }
         }
 
+        // Update Product
         rateLimit (RateLimitName("upload_limit")) {
             put<ProductResource.Id> { request ->
-                val productId = ProductId(request.id)
+                val groupId = GroupId(request.parent.parent.groupId)
+                val productId = ProductId(request.productId)
                 val productRequest = call.receive<ProductRequest>()
                 val productParams = productRequest.toDomainParams()
 
+                call.verifyGroupAccess(
+                    groupId = groupId,
+                    verifyUserGroupRole = verifyUserGroupRoleUseCase,
+                    allowedRoles = listOf(AppRole.OWNER, AppRole.ADMIN)
+                ) ?: return@put
+
                 when (
-                    val result = useCases.updateProduct(productId, productParams)
+                    val result = useCases.updateProduct(
+                        productId = productId,
+                        productParams = productParams,
+                        groupId = groupId
+                    )
                 ) {
                     is DomainResult.Success -> call.respond(HttpStatusCode.OK, result.data.toResponse())
                     is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
@@ -91,9 +142,17 @@ fun Route.productRoutes() {
             }
         }
 
+        // Upload product image
         rateLimit (RateLimitName("upload_limit")) {
             put<ProductResource.Id.ProductImage> { request ->
-                val productId = ProductId(request.parent.id)
+                val groupId = GroupId(request.parent.parent.parent.groupId)
+                val productId = ProductId(request.parent.productId)
+
+                call.verifyGroupAccess(
+                    groupId = groupId,
+                    verifyUserGroupRole = verifyUserGroupRoleUseCase,
+                    allowedRoles = listOf(AppRole.OWNER, AppRole.ADMIN)
+                ) ?: return@put
 
                 var fileBytes: ByteArray? = null
 
@@ -116,7 +175,11 @@ fun Route.productRoutes() {
                 }
 
                 when(
-                    val result = useCases.uploadProductImage(productId, finalBytes)
+                    val result = useCases.uploadProductImage(
+                        productId = productId,
+                        fileBytes = finalBytes,
+                        groupId = groupId
+                    )
                 ) {
                     is DomainResult.Success -> call.respond(HttpStatusCode.OK, result.data)
                     is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
@@ -124,21 +187,44 @@ fun Route.productRoutes() {
             }
         }
 
+        // Delete Product
         delete<ProductResource.Id>{ request ->
-            val productId = ProductId(request.id)
+            val groupId = GroupId(request.parent.parent.groupId)
+            val productId = ProductId(request.productId)
+
+            call.verifyGroupAccess(
+                groupId = groupId,
+                verifyUserGroupRole = verifyUserGroupRoleUseCase,
+                allowedRoles = listOf(AppRole.OWNER, AppRole.ADMIN)
+            ) ?: return@delete
+
             when(
-                val result = useCases.deleteProduct(productId)
+                val result = useCases.deleteProduct(
+                    productId = productId,
+                    groupId = groupId
+                )
             ) {
                 is DomainResult.Success -> call.respond(HttpStatusCode.NoContent)
                 is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
             }
         }
 
+        // Delete product image
         delete<ProductResource.Id.ProductImage> { request ->
-            val productId = ProductId(request.parent.id)
+            val groupId = GroupId(request.parent.parent.parent.groupId)
+            val productId = ProductId(request.parent.productId)
+
+            call.verifyGroupAccess(
+                groupId = groupId,
+                verifyUserGroupRole = verifyUserGroupRoleUseCase,
+                allowedRoles = listOf(AppRole.OWNER, AppRole.ADMIN)
+            ) ?: return@delete
 
             when(
-                val result = useCases.deleteProductImage(productId)
+                val result = useCases.deleteProductImage(
+                    productId = productId,
+                    groupId = groupId
+                )
             ) {
                 is DomainResult.Success -> call.respond(HttpStatusCode.NoContent)
                 is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)

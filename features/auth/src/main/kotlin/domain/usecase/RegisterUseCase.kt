@@ -7,9 +7,9 @@ import domain.model.UserSession
 import domain.repository.AuthRepository
 import domain.security.PasswordHasher
 import domain.security.TokenProvider
-import domain.validation.ValidationRulesAuth
 import result.DomainResult
 import result.ErrorType
+import validation.ValidationRules
 import java.util.UUID
 
 class RegisterUseCase (
@@ -31,8 +31,20 @@ class RegisterUseCase (
             errors.add("Name cannot exceed 128 characters")
         }
 
-        errors.addAll(ValidationRulesAuth.validateEmail(sanitizedEmail))
-        errors.addAll(ValidationRulesAuth.validatePassword(rawPassword))
+        errors.addAll(
+            ValidationRules.validateEmail(
+                item = sanitizedEmail,
+                getId = { "Email" },
+                getValue = { it },
+            )
+        )
+        errors.addAll(
+            ValidationRules.validatePassword(
+                item = rawPassword,
+                getId = { "Password" },
+                getValue = { it },
+            )
+        )
 
         if (errors.isNotEmpty()) {
             return DomainResult.Error(

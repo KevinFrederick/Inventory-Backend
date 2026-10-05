@@ -1,5 +1,6 @@
 package domain.usecase.product
 
+import model.GroupId
 import domain.model.Product
 import domain.model.ProductParams
 import domain.repository.CategoryRepository
@@ -7,7 +8,6 @@ import domain.repository.ProductRepository
 import domain.usecase.util.StockBatchAssembler
 import domain.validation.ProductValidator
 import result.DomainResult
-import result.ErrorType
 
 class InsertProductUseCase (
     private val productRepository: ProductRepository,
@@ -15,18 +15,18 @@ class InsertProductUseCase (
     private val stockBatchAssembler: StockBatchAssembler,
     private val productValidator: ProductValidator
 ) {
-    suspend operator fun invoke(productParams: ProductParams): DomainResult<Product> {
+    suspend operator fun invoke(productParams: ProductParams, groupId: GroupId): DomainResult<Product> {
         val category = when (
-            val categoryResult = categoryRepository.getCategoryById(productParams.categoryId)
+            val categoryResult = categoryRepository.getCategoryById(productParams.categoryId, groupId)
         ) {
             is DomainResult.Success -> {
-                categoryResult.data ?: return DomainResult.Error("Category not found", ErrorType.NOT_FOUND)
+                categoryResult.data
             }
             is DomainResult.Error -> return categoryResult
         }
 
         val batches = when (
-            val batchesResult = stockBatchAssembler.assembleBatches(productParams.batches)
+            val batchesResult = stockBatchAssembler.assembleBatches(productParams.batches, groupId)
         ) {
             is DomainResult.Success -> batchesResult.data
             is DomainResult.Error -> return batchesResult
@@ -54,6 +54,6 @@ class InsertProductUseCase (
             is DomainResult.Success -> {}
         }
 
-        return productRepository.insertProduct(product)
+        return productRepository.insertProduct(product, groupId)
     }
 }

@@ -1,5 +1,6 @@
 package data.table.product
 
+import data.table.user.GroupTable
 import org.jetbrains.exposed.v1.core.ReferenceOption
 import org.jetbrains.exposed.v1.core.Table
 
@@ -11,12 +12,17 @@ object ProductTable: Table("product") {
         CategoryTable.categoryId,
         ReferenceOption.RESTRICT
     )
+    val groupId = reference(
+        name = "group_id",
+        refColumn = GroupTable.groupId,
+        onDelete = ReferenceOption.CASCADE
+    )
 
     val name = varchar("name", 255)
     val description = text("description").nullable()
-    val barcode = varchar("barcode", 64).uniqueIndex().nullable()
+    val barcode = varchar("barcode", 64).nullable()
     val barcodeFormat = varchar("barcode_format", 64).nullable()
-    val sku = varchar("sku", 128).uniqueIndex().nullable()
+    val sku = varchar("sku", 128).nullable()
     val imageUri = text("image_uri").nullable()
     val minimumQuantity = integer("minimum_quantity").default(0)
     val createdAt = long("created_at")
@@ -24,4 +30,9 @@ object ProductTable: Table("product") {
     val serverUpdatedAt = long("server_updated_at")
 
     override val primaryKey: PrimaryKey = PrimaryKey(productId)
+
+    init {
+        uniqueIndex(groupId, barcode)
+        uniqueIndex(groupId, sku)
+    }
 }

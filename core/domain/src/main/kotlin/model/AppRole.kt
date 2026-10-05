@@ -1,4 +1,4 @@
-package domain.model
+package model
 
 enum class AppRole {
     OWNER,

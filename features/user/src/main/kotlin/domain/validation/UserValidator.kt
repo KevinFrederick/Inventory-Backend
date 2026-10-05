@@ -52,7 +52,7 @@ class UserValidator {
         )
 
         errors.addAll(
-            ValidationRulesUser.validateEmail(
+            ValidationRules.validateEmail(
                 item = item,
                 getId = getId,
                 getValue = getEmail

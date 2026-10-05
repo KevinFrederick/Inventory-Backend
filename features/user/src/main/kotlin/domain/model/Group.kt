@@ -1,7 +1,6 @@
 package domain.model
 
-@JvmInline
-value class GroupId(val value: String)
+import model.GroupId
 
 data class Group(
     val groupId: GroupId,

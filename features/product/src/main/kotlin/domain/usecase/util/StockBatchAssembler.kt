@@ -1,5 +1,6 @@
 package domain.usecase.util
 
+import model.GroupId
 import domain.model.StockBatch
 import domain.model.StockBatchParams
 import domain.repository.LocationRepository
@@ -10,7 +11,8 @@ class StockBatchAssembler (
     private val locationRepository: LocationRepository,
 ) {
     suspend fun assembleBatches(
-        batches: List<StockBatchParams>
+        batches: List<StockBatchParams>,
+        groupId: GroupId
     ): DomainResult<List<StockBatch>> {
         if (batches.isEmpty()) {
             return DomainResult.Success(emptyList())
@@ -19,7 +21,7 @@ class StockBatchAssembler (
         val locationIds = batches.map { it.locationId }.distinct()
 
         val locations = when (
-            val locationResult = locationRepository.getLocationsByIds(locationIds)
+            val locationResult = locationRepository.getLocationsByIds(locationIds, groupId)
         ) {
             is DomainResult.Success -> {
                 if (locationResult.data.isEmpty()) {

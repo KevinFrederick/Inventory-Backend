@@ -5,9 +5,9 @@ import data.mapper.toDomain
 import data.table.user.GroupTable
 import data.table.user.UserGroupTable
 import data.table.user.UserTable
-import domain.model.AppRole
 import domain.model.Group
-import domain.model.GroupId
+import model.AppRole
+import model.GroupId
 import domain.model.GroupMember
 import domain.model.UserGroup
 import domain.repository.GroupRepository
@@ -22,10 +22,11 @@ import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
 import org.slf4j.LoggerFactory
+import repository.UserRoleProvider
 import result.DomainResult
 import result.ErrorType
 
-class GroupRepositoryImpl: GroupRepository {
+class GroupRepositoryImpl: GroupRepository, UserRoleProvider {
     private val logger = LoggerFactory.getLogger(GroupRepositoryImpl::class.java)
 
     override suspend fun getGroupById(groupId: GroupId): DomainResult<Group?> = dbQuery {
@@ -159,17 +160,6 @@ class GroupRepositoryImpl: GroupRepository {
         }
     }
 
-    override suspend fun getUserRoleInGroup(
-        userId: UserId,
-        groupId: GroupId
-    ): AppRole? = dbQuery {
-        UserGroupTable
-            .select(UserGroupTable.role)
-            .where { (UserGroupTable.userId eq userId.value) and (UserGroupTable.groupId eq groupId.value) }
-            .map { AppRole.valueOf(it[UserGroupTable.role]) }
-            .singleOrNull()
-    }
-
     override suspend fun updateMemberRole(
         userId: UserId,
         groupId: GroupId,
@@ -210,5 +200,16 @@ class GroupRepositoryImpl: GroupRepository {
         } catch (e: Exception) {
             DomainResult.Error(e.localizedMessage ?: "Unknown Error", ErrorType.UNKNOWN)
         }
+    }
+
+    override suspend fun getUserRole(
+        userId: UserId,
+        groupId: GroupId
+    ): AppRole? = dbQuery {
+        UserGroupTable
+            .select(UserGroupTable.role)
+            .where { (UserGroupTable.userId eq userId.value) and (UserGroupTable.groupId eq groupId.value) }
+            .map { AppRole.valueOf(it[UserGroupTable.role]) }
+            .singleOrNull()
     }
 }

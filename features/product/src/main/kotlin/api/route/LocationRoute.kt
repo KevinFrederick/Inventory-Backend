@@ -7,6 +7,7 @@ import api.mapper.toResponse
 import domain.model.LocationId
 import result.DomainResult
 import domain.usecase.location.LocationUseCases
+import io.ktor.client.request.request
 import io.ktor.http.HttpStatusCode
 import io.ktor.resources.Resource
 import io.ktor.server.auth.authenticate
@@ -20,47 +21,84 @@ import io.ktor.server.resources.post
 import io.ktor.server.resources.put
 import io.ktor.server.response.respond
 import kotlinx.serialization.Serializable
+import model.AppRole
+import model.GroupId
 import org.koin.ktor.ext.inject
+import resource.GroupResource
+import usecase.VerifyUserGroupRoleUseCase
+import util.verifyGroupAccess
 
 @Serializable
-@Resource("/location")
-class LocationResource {
+@Resource("location")
+class LocationResource (val parent: GroupResource.Id) {
     @Serializable
-    @Resource("{id}")
-    class Id (val parent: LocationResource = LocationResource(), val id: String)
+    @Resource("{locationId}")
+    class Id (val parent: LocationResource, val locationId: String)
 }
 
 fun Route.locationRoutes() {
     val useCases: LocationUseCases by inject()
+    val verifyUserGroupRoleUseCase: VerifyUserGroupRoleUseCase by inject()
 
     authenticate("auth-jwt") {
-        get <LocationResource> {
+        // Get all locations for current group
+        get <LocationResource> { request ->
+            val groupId = GroupId(request.parent.groupId)
+
+            call.verifyGroupAccess(
+                groupId = groupId,
+                verifyUserGroupRole = verifyUserGroupRoleUseCase,
+            ) ?: return@get
+
             when(
-                val result = useCases.getAllLocation()
+                val result = useCases.getAllLocation(
+                    groupId = groupId,
+                )
             ) {
                 is DomainResult.Success -> call.respond(HttpStatusCode.OK, result.data.map { it.toResponse() })
                 is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
             }
         }
 
+        // Get location
         get <LocationResource.Id> { request ->
-            val locationId = LocationId(request.id)
+            val groupId = GroupId(request.parent.parent.groupId)
+            val locationId = LocationId(request.locationId)
+
+            call.verifyGroupAccess(
+                groupId = groupId,
+                verifyUserGroupRole = verifyUserGroupRoleUseCase,
+            ) ?: return@get
 
             when(
-                val result = useCases.getLocationById(locationId)
+                val result = useCases.getLocationById(
+                    locationId = locationId,
+                    groupId = groupId,
+                )
             ) {
                 is DomainResult.Success -> call.respond(HttpStatusCode.OK, result.data.toResponse())
                 is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
             }
         }
 
+        // Insert Location
         rateLimit (RateLimitName("upload_limit")) {
-            post <LocationResource> {
+            post <LocationResource> { request ->
+                val groupId = GroupId(request.parent.groupId)
                 val locationRequest = call.receive<LocationRequest>()
                 val location = locationRequest.toDomain()
 
+                call.verifyGroupAccess(
+                    groupId = groupId,
+                    verifyUserGroupRole = verifyUserGroupRoleUseCase,
+                    allowedRoles = listOf(AppRole.OWNER, AppRole.ADMIN)
+                ) ?: return@post
+
                 when(
-                    val result = useCases.insertLocation(location)
+                    val result = useCases.insertLocation(
+                        location = location,
+                        groupId = groupId,
+                    )
                 ) {
                     is DomainResult.Success -> call.respond(HttpStatusCode.Created, location.toResponse())
                     is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
@@ -68,14 +106,26 @@ fun Route.locationRoutes() {
             }
         }
 
+        // Update location
         rateLimit (RateLimitName("upload_limit")) {
             put <LocationResource.Id> { request ->
-                val locationId = LocationId(request.id)
+                val groupId = GroupId(request.parent.parent.groupId)
+                val locationId = LocationId(request.locationId)
                 val locationRequest = call.receive<LocationRequest>()
                 val updatedLocation = locationRequest.toDomain()
 
+                call.verifyGroupAccess(
+                    groupId = groupId,
+                    verifyUserGroupRole = verifyUserGroupRoleUseCase,
+                    allowedRoles = listOf(AppRole.OWNER, AppRole.ADMIN)
+                ) ?: return@put
+
                 when (
-                    val result = useCases.updateLocation(locationId, updatedLocation)
+                    val result = useCases.updateLocation(
+                        locationId = locationId,
+                        location = updatedLocation,
+                        groupId = groupId,
+                    )
                 ) {
                     is DomainResult.Success -> call.respond(HttpStatusCode.OK, updatedLocation.toResponse())
                     is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
@@ -83,11 +133,22 @@ fun Route.locationRoutes() {
             }
         }
 
+        // Delete location
         delete <LocationResource.Id> { request ->
-            val locationId = LocationId(request.id)
+            val groupId = GroupId(request.parent.parent.groupId)
+            val locationId = LocationId(request.locationId)
+
+            call.verifyGroupAccess(
+                groupId = groupId,
+                verifyUserGroupRole = verifyUserGroupRoleUseCase,
+                allowedRoles = listOf(AppRole.OWNER, AppRole.ADMIN)
+            ) ?: return@delete
 
             when(
-                val result = useCases.deleteLocation(locationId)
+                val result = useCases.deleteLocation(
+                    locationId = locationId,
+                    groupId = groupId,
+                )
             ) {
                 is DomainResult.Success -> call.respond(HttpStatusCode.NoContent)
                 is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)

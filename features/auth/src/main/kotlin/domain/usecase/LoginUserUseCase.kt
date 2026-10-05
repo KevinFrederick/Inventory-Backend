@@ -6,9 +6,9 @@ import domain.repository.AuthRepository
 import domain.security.PasswordHasher
 import domain.security.TokenProvider
 import domain.util.hashWithSHA256
-import domain.validation.ValidationRulesAuth
 import result.DomainResult
 import result.ErrorType
+import validation.ValidationRules
 
 class LoginUserUseCase (
     private val authRepository: AuthRepository,
@@ -20,7 +20,11 @@ class LoginUserUseCase (
         rawPassword: String
     ): DomainResult<UserSession> {
         val sanitizedEmail = email.trim().lowercase()
-        val emailErrors = ValidationRulesAuth.validateEmail(sanitizedEmail)
+        val emailErrors = ValidationRules.validateEmail(
+            item = sanitizedEmail,
+            getId = { "Email" },
+            getValue = { it },
+        )
 
         if (emailErrors.isNotEmpty()) {
             return DomainResult.Error(

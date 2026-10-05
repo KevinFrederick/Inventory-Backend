@@ -1,8 +1,8 @@
 package domain.repository
 
-import domain.model.AppRole
 import domain.model.Group
-import domain.model.GroupId
+import model.AppRole
+import model.GroupId
 import domain.model.GroupMember
 import domain.model.UserGroup
 import model.UserId
@@ -17,7 +17,6 @@ interface GroupRepository {
     suspend fun addUserToGroup(userGroup: UserGroup): DomainResult<Unit>
     suspend fun getGroupsForUser(userId: UserId): DomainResult<List<Group>>
     suspend fun getGroupMembers(groupId: GroupId): DomainResult<List<GroupMember>>
-    suspend fun getUserRoleInGroup(userId: UserId, groupId: GroupId): AppRole?
     suspend fun updateMemberRole(userId: UserId, groupId: GroupId, newRole: AppRole): DomainResult<Unit>
     suspend fun removeMember(userId: UserId, groupId: GroupId): DomainResult<Unit>
 }

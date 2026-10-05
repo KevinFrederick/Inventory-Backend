@@ -1,20 +1,22 @@
 package domain.usecase.group
 
 import domain.model.Group
-import domain.model.GroupId
+import model.GroupId
 import domain.repository.GroupRepository
 import model.UserId
+import repository.UserRoleProvider
 import result.DomainResult
 import result.ErrorType
 
 class GetGroupByIdUseCase (
-    private val groupRepository: GroupRepository
+    private val groupRepository: GroupRepository,
+    private val userRoleProvider: UserRoleProvider
 ) {
     suspend operator fun invoke(
         requesterId: UserId,
         groupId: GroupId
     ): DomainResult<Group> {
-        groupRepository.getUserRoleInGroup(requesterId, groupId)
+        userRoleProvider.getUserRole(requesterId, groupId)
             ?: return DomainResult.Error("You do not have permission to access this group", ErrorType.FORBIDDEN)
 
         return when(
