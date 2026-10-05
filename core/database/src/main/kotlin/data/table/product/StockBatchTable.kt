@@ -1,5 +1,6 @@
 package data.table.product
 
+import data.table.user.GroupTable
 import org.jetbrains.exposed.v1.core.ReferenceOption
 import org.jetbrains.exposed.v1.core.Table
 
@@ -16,6 +17,11 @@ object StockBatchTable: Table("stock_batch") {
         "location_id",
         LocationTable.locationId,
         onDelete = ReferenceOption.RESTRICT,
+    )
+    val groupId = reference(
+        name = "group_id",
+        refColumn = GroupTable.groupId,
+        onDelete = ReferenceOption.CASCADE
     )
 
     val quantity = integer("quantity")

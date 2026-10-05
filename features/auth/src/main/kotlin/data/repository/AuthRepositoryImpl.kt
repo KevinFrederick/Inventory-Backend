@@ -1,13 +1,13 @@
 package data.repository
 
 import DatabaseFactory.dbQuery
-import data.mapper.toDomain
+import mapper.toDomain
 import data.mapper.toRefreshToken
 import data.table.auth.RefreshTokenTable
-import data.table.auth.UserTable
+import data.table.user.UserTable
 import domain.model.RefreshToken
-import domain.model.User
-import domain.model.UserId
+import model.User
+import model.UserId
 import domain.repository.AuthRepository
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.lessEq

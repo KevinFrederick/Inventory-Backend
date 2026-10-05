@@ -19,16 +19,22 @@ import domain.model.sync.SyncPayload
 import domain.model.sync.SyncPullResponse
 import domain.model.sync.SyncPushResponse
 import domain.repository.SyncRepository
+import model.GroupId
+import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.greater
 import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.jdbc.batchUpsert
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.slf4j.LoggerFactory
 import result.DomainResult
 import result.ErrorType
 
 class SyncRepositoryImpl: SyncRepository {
-    override suspend fun pushSync(syncPayload: SyncPayload): DomainResult<SyncPushResponse> {
+    private val logger = LoggerFactory.getLogger(SyncRepositoryImpl::class.java)
+
+    override suspend fun pushSync(syncPayload: SyncPayload, groupId: GroupId): DomainResult<SyncPushResponse> {
         return try {
             val response = dbQuery {
                 val timeStamp = System.currentTimeMillis()
@@ -42,6 +48,7 @@ class SyncRepositoryImpl: SyncRepository {
                 if (deleted.isNotEmpty()) {
                     DeletedTable.batchUpsert(deleted) { (id, type) ->
                         this[DeletedTable.entityId] = id
+                        this[DeletedTable.groupId] = groupId.value
                         this[DeletedTable.entityType] = type
                         this[DeletedTable.deletedAt] = timeStamp
                     }
@@ -49,19 +56,27 @@ class SyncRepositoryImpl: SyncRepository {
 
                 // Delete Bottom - Up
                 if (syncPayload.deletedBatches.isNotEmpty()) {
-                    StockBatchTable.deleteWhere { StockBatchTable.batchId inList syncPayload.deletedBatches.map { it.value } }
+                    StockBatchTable.deleteWhere {
+                        (StockBatchTable.batchId inList syncPayload.deletedBatches.map { it.value }) and (StockBatchTable.groupId eq groupId.value)
+                    }
                 }
 
                 if (syncPayload.deletedProduct.isNotEmpty()){
-                    ProductTable.deleteWhere { ProductTable.productId inList syncPayload.deletedProduct.map { it.value } }
+                    ProductTable.deleteWhere {
+                        (ProductTable.productId inList syncPayload.deletedProduct.map { it.value }) and (ProductTable.groupId eq groupId.value)
+                    }
                 }
 
                 if (syncPayload.deletedLocations.isNotEmpty()) {
-                    LocationTable.deleteWhere { LocationTable.locationId inList syncPayload.deletedLocations.map { it.value } }
+                    LocationTable.deleteWhere {
+                        (LocationTable.locationId inList syncPayload.deletedLocations.map { it.value }) and (LocationTable.groupId eq groupId.value)
+                    }
                 }
 
                 if (syncPayload.deletedCategories.isNotEmpty()) {
-                    CategoryTable.deleteWhere { CategoryTable.categoryId inList syncPayload.deletedCategories.map { it.value } }
+                    CategoryTable.deleteWhere {
+                        (CategoryTable.categoryId inList syncPayload.deletedCategories.map { it.value }) and (CategoryTable.groupId eq groupId.value)
+                    }
                 }
 
                 // Conflict Resolution
@@ -87,7 +102,7 @@ class SyncRepositoryImpl: SyncRepository {
                 if (incomingIds.isNotEmpty()) {
                     DeletedTable
                         .selectAll()
-                        .where { DeletedTable.entityId inList incomingIds }
+                        .where { (DeletedTable.entityId inList incomingIds) and (DeletedTable.groupId eq groupId.value) }
                         .forEach { row ->
                             deletedMap[row[DeletedTable.entityId]] = row[DeletedTable.deletedAt]
                         }
@@ -103,6 +118,7 @@ class SyncRepositoryImpl: SyncRepository {
                         keys = arrayOf(CategoryTable.categoryId)
                     ) { category ->
                         this[CategoryTable.categoryId] = category.categoryId.value
+                        this[CategoryTable.groupId] = groupId.value
                         this[CategoryTable.name] = category.name
                         this[CategoryTable.description] = category.description
                         this[CategoryTable.createdAt] = category.createdAt
@@ -120,6 +136,7 @@ class SyncRepositoryImpl: SyncRepository {
                         keys = arrayOf(LocationTable.locationId)
                     ) { location ->
                         this[LocationTable.locationId] = location.locationId.value
+                        this[LocationTable.groupId] = groupId.value
                         this[LocationTable.name] = location.name
                         this[LocationTable.description] = location.description
                         this[LocationTable.locationBarcode] = location.locationBarcode
@@ -139,6 +156,7 @@ class SyncRepositoryImpl: SyncRepository {
                     ) { product ->
                         this[ProductTable.productId] = product.productId.value
                         this[ProductTable.categoryId] = product.categoryId.value
+                        this[ProductTable.groupId] = groupId.value
                         this[ProductTable.name] = product.name
                         this[ProductTable.description] = product.description
                         this[ProductTable.barcode] = product.barcode
@@ -163,6 +181,7 @@ class SyncRepositoryImpl: SyncRepository {
                         this[StockBatchTable.batchId] = batch.batchId.value
                         this[StockBatchTable.productId] = batch.productId.value
                         this[StockBatchTable.locationId] = batch.locationId.value
+                        this[StockBatchTable.groupId] = groupId.value
                         this[StockBatchTable.quantity] = batch.quantity
                         this[StockBatchTable.price] = batch.price
                         this[StockBatchTable.expirationDate] = batch.expirationDate
@@ -182,38 +201,49 @@ class SyncRepositoryImpl: SyncRepository {
 
             DomainResult.Success(response)
         } catch (e: Exception) {
+            logger.error("Error pushing sync data", e)
             DomainResult.Error(e.message ?: "Failed to push sync data", ErrorType.UNKNOWN)
         }
     }
 
-    override suspend fun pullSync(updatedAfter: Long): DomainResult<SyncPullResponse> {
+    override suspend fun pullSync(updatedAfter: Long, groupId: GroupId): DomainResult<SyncPullResponse> {
         return try {
             val response = dbQuery {
                 val timeStamp = System.currentTimeMillis()
 
                 val updatedCategories = CategoryTable
                     .selectAll()
-                    .where { CategoryTable.serverUpdatedAt greater updatedAfter }
+                    .where {
+                        (CategoryTable.serverUpdatedAt greater updatedAfter) and (CategoryTable.groupId eq groupId.value)
+                    }
                     .map { it.toCategory() }
 
                 val updatedLocations = LocationTable
                     .selectAll()
-                    .where { LocationTable.serverUpdatedAt greater updatedAfter }
+                    .where {
+                        (LocationTable.serverUpdatedAt greater updatedAfter) and (LocationTable.groupId eq groupId.value)
+                    }
                     .map { it.toLocation() }
 
                 val updatedProduct = ProductTable
                     .selectAll()
-                    .where { ProductTable.serverUpdatedAt greater updatedAfter }
+                    .where {
+                        (ProductTable.serverUpdatedAt greater updatedAfter) and (ProductTable.groupId eq groupId.value)
+                    }
                     .map { it.toSyncProduct() }
 
                 val updatedBatch = StockBatchTable
                     .selectAll()
-                    .where { StockBatchTable.serverUpdatedAt greater updatedAfter }
+                    .where {
+                        (StockBatchTable.serverUpdatedAt greater updatedAfter) and (StockBatchTable.groupId eq groupId.value)
+                    }
                     .map { it.toSyncStockBatch() }
 
                 val deleted = DeletedTable
                     .selectAll()
-                    .where { DeletedTable.deletedAt greater updatedAfter }
+                    .where {
+                        (DeletedTable.deletedAt greater updatedAfter) and (DeletedTable.groupId eq groupId.value)
+                    }
                     .toList()
 
                 val deletedCategoryIds = deleted.filter { it[DeletedTable.entityType] == EntityType.CATEGORY.name }
@@ -240,6 +270,7 @@ class SyncRepositoryImpl: SyncRepository {
 
             DomainResult.Success(response)
         } catch (e: Exception) {
+            logger.error("Error pulling sync data", e)
             DomainResult.Error(e.message ?: "Failed to pull sync data", ErrorType.UNKNOWN)
         }
     }

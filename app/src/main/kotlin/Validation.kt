@@ -2,6 +2,7 @@ package com.kevinfreyap
 
 import api.validation.batchValidation
 import api.validation.categoryValidation
+import api.validation.groupValidation
 import api.validation.locationValidation
 import api.validation.loginValidation
 import api.validation.productValidation
@@ -26,6 +27,7 @@ fun Application.configureValidation() {
 
         registerValidation()
         loginValidation()
+        groupValidation()
     }
 
     install(StatusPages) {

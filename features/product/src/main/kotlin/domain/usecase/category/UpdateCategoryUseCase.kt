@@ -2,6 +2,7 @@ package domain.usecase.category
 
 import domain.model.Category
 import domain.model.CategoryId
+import model.GroupId
 import domain.repository.CategoryRepository
 import domain.validation.CategoryValidator
 import result.DomainResult
@@ -13,7 +14,8 @@ class UpdateCategoryUseCase (
 ) {
     suspend operator fun invoke (
         categoryId: CategoryId,
-        category: Category
+        category: Category,
+        groupId: GroupId
     ): DomainResult<Unit> {
         return if (category.categoryId != categoryId) {
             DomainResult.Error("Category Id doesn't match", ErrorType.BAD_REQUEST)
@@ -25,7 +27,7 @@ class UpdateCategoryUseCase (
                 is DomainResult.Success -> {}
             }
 
-            repository.updateCategory(category)
+            repository.updateCategory(category, groupId)
         }
     }
 }

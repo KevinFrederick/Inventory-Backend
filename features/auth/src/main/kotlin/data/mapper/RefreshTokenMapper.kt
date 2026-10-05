@@ -3,7 +3,7 @@ package data.mapper
 import data.table.auth.RefreshTokenTable
 import domain.model.RefreshToken
 import domain.model.RefreshTokenId
-import domain.model.UserId
+import model.UserId
 import org.jetbrains.exposed.v1.core.ResultRow
 
 fun ResultRow.toRefreshToken(): RefreshToken =

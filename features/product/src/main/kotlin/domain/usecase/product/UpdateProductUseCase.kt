@@ -1,5 +1,6 @@
 package domain.usecase.product
 
+import model.GroupId
 import domain.model.Product
 import domain.model.ProductId
 import domain.model.ProductParams
@@ -18,22 +19,23 @@ class UpdateProductUseCase (
 ) {
     suspend operator fun invoke(
         productId: ProductId,
-        productParams: ProductParams
+        productParams: ProductParams,
+        groupId: GroupId,
     ): DomainResult<Product> {
         return if (productId != productParams.productId) {
             DomainResult.Error("Product Id doesn't match", ErrorType.BAD_REQUEST)
         } else {
             val category = when (
-                val categoryResult = categoryRepository.getCategoryById(productParams.categoryId)
+                val categoryResult = categoryRepository.getCategoryById(productParams.categoryId, groupId)
             ) {
                 is DomainResult.Success -> {
-                    categoryResult.data ?: return DomainResult.Error("Category not found", ErrorType.NOT_FOUND)
+                    categoryResult.data
                 }
                 is DomainResult.Error -> return categoryResult
             }
 
             val batches = when (
-                val batchesResult = stockBatchAssembler.assembleBatches(productParams.batches)
+                val batchesResult = stockBatchAssembler.assembleBatches(productParams.batches, groupId)
             ) {
                 is DomainResult.Success -> batchesResult.data
                 is DomainResult.Error -> return batchesResult
@@ -61,7 +63,7 @@ class UpdateProductUseCase (
                 is DomainResult.Success -> {}
             }
 
-            productRepository.updateProduct(product)
+            productRepository.updateProduct(product, groupId)
         }
 
     }

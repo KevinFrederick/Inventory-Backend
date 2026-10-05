@@ -1,5 +1,6 @@
 package domain.usecase.location
 
+import model.GroupId
 import domain.model.Location
 import domain.model.LocationId
 import domain.repository.LocationRepository
@@ -13,7 +14,8 @@ class UpdateLocationUseCase (
 ) {
     suspend operator fun invoke(
         locationId: LocationId,
-        location: Location
+        location: Location,
+        groupId: GroupId
     ): DomainResult<Unit> {
         return if (location.locationId != locationId) {
             DomainResult.Error("Location Id doesn't match", ErrorType.BAD_REQUEST)
@@ -25,7 +27,7 @@ class UpdateLocationUseCase (
                 is DomainResult.Success -> {}
             }
 
-            repository.updateLocation(location)
+            repository.updateLocation(location, groupId)
         }
     }
 }
