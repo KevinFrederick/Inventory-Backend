@@ -61,7 +61,7 @@ class GroupValidator {
                 getId = getId,
                 getFieldName = { "Address" },
                 getValue = getAddress,
-                maxLength = 2000,
+                maxLength = 500,
                 allowNewLines = true,
                 allowSpace = true
             )

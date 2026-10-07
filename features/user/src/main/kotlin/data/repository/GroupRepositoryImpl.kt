@@ -9,6 +9,7 @@ import domain.model.Group
 import model.AppRole
 import model.GroupId
 import domain.model.GroupMember
+import domain.model.GroupWithRole
 import domain.model.UserGroup
 import domain.repository.GroupRepository
 import model.UserId
@@ -42,7 +43,7 @@ class GroupRepositoryImpl: GroupRepository, UserRoleProvider {
         }
     }
 
-    override suspend fun createGroup(group: Group, owner: UserGroup): DomainResult<Group> = dbQuery {
+    override suspend fun createGroup(group: Group, owner: UserGroup): DomainResult<GroupWithRole> = dbQuery {
         try {
             val timestamp = System.currentTimeMillis()
 
@@ -66,7 +67,12 @@ class GroupRepositoryImpl: GroupRepository, UserRoleProvider {
                 }
             }
 
-            DomainResult.Success(group)
+            DomainResult.Success(
+                GroupWithRole(
+                    group = group,
+                    role = owner.role
+                )
+            )
         } catch (e: ExposedSQLException) {
             logger.error("Exposed constraint violation for Group ${group.groupId.value}", e)
             DomainResult.Error("Failed to create group due to database constraint.", ErrorType.CONFLICT)
@@ -110,7 +116,7 @@ class GroupRepositoryImpl: GroupRepository, UserRoleProvider {
         }
     }
 
-    override suspend fun addUserToGroup(userGroup: UserGroup): DomainResult<Unit> = dbQuery {
+    override suspend fun addUserToGroup(userGroup: UserGroup): DomainResult<GroupMember> = dbQuery {
         try {
             UserGroupTable.insert {
                 it[userId] = userGroup.userId.value
@@ -120,7 +126,23 @@ class GroupRepositoryImpl: GroupRepository, UserRoleProvider {
                 it[serverUpdatedAt] = System.currentTimeMillis()
             }
 
-            DomainResult.Success(Unit)
+            val memberResult = (UserTable innerJoin UserGroupTable).selectAll()
+                .where {
+                    (UserGroupTable.userId eq userGroup.userId.value) and
+                    (UserGroupTable.groupId eq userGroup.groupId.value)
+                }
+                .single()
+
+            val groupMember = GroupMember(
+                userId = UserId(memberResult[UserTable.userId]),
+                avatarUrl = memberResult[UserTable.avatarUrl],
+                name = memberResult[UserTable.name],
+                email = memberResult[UserTable.email],
+                role = AppRole.valueOf(memberResult[UserGroupTable.role]),
+                joinedAt = memberResult[UserGroupTable.joinedAt]
+            )
+
+            DomainResult.Success(groupMember)
         } catch (_: ExposedSQLException) {
             DomainResult.Error("User is already in this group.", ErrorType.CONFLICT)
         } catch (e: Exception) {
@@ -128,11 +150,14 @@ class GroupRepositoryImpl: GroupRepository, UserRoleProvider {
         }
     }
 
-    override suspend fun getGroupsForUser(userId: UserId): DomainResult<List<Group>> = dbQuery {
+    override suspend fun getGroupsForUser(userId: UserId): DomainResult<List<GroupWithRole>> = dbQuery {
         try {
             val groups = (GroupTable innerJoin UserGroupTable).selectAll()
                 .where { UserGroupTable.userId eq userId.value }
-                .map { it.toDomain() }
+                .map { GroupWithRole(
+                    group = it.toDomain(),
+                    role = AppRole.valueOf(it[UserGroupTable.role])
+                ) }
 
             DomainResult.Success(groups)
         } catch (e: Exception) {
@@ -147,6 +172,7 @@ class GroupRepositoryImpl: GroupRepository, UserRoleProvider {
                 .map {
                     GroupMember(
                         userId = UserId(it[UserTable.userId]),
+                        avatarUrl = it[UserTable.avatarUrl],
                         name = it[UserTable.name],
                         email = it[UserTable.email],
                         role = AppRole.valueOf(it[UserGroupTable.role]),
@@ -164,7 +190,7 @@ class GroupRepositoryImpl: GroupRepository, UserRoleProvider {
         userId: UserId,
         groupId: GroupId,
         newRole: AppRole
-    ): DomainResult<Unit> = dbQuery {
+    ): DomainResult<GroupMember> = dbQuery {
         try {
             val updatedRows = UserGroupTable.update({
                 (UserGroupTable.userId eq userId.value) and (UserGroupTable.groupId eq groupId.value)
@@ -173,8 +199,27 @@ class GroupRepositoryImpl: GroupRepository, UserRoleProvider {
                 it[serverUpdatedAt] = System.currentTimeMillis()
             }
 
+            if (updatedRows == 0) {
+                return@dbQuery DomainResult.Error("Member not found.", ErrorType.NOT_FOUND)
+            }
+
+            val memberResult = (UserTable innerJoin UserGroupTable).selectAll()
+                .where {
+                    (UserTable.userId eq userId.value) and (UserGroupTable.groupId eq groupId.value)
+                }
+                .single()
+
+            val groupMember = GroupMember(
+                userId = UserId(memberResult[UserTable.userId]),
+                avatarUrl = memberResult[UserTable.avatarUrl],
+                name = memberResult[UserTable.name],
+                email = memberResult[UserTable.email],
+                role = AppRole.valueOf(memberResult[UserGroupTable.role]),
+                joinedAt = memberResult[UserGroupTable.joinedAt]
+            )
+
             if (updatedRows > 0) {
-                DomainResult.Success(Unit)
+                DomainResult.Success(groupMember)
             } else {
                 DomainResult.Error("Member not found.", ErrorType.NOT_FOUND)
             }
