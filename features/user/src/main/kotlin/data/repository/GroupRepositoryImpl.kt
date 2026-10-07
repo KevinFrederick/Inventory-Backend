@@ -5,11 +5,11 @@ import data.mapper.toDomain
 import data.table.user.GroupTable
 import data.table.user.UserGroupTable
 import data.table.user.UserTable
-import domain.model.Group
+import model.Group
 import model.AppRole
 import model.GroupId
 import domain.model.GroupMember
-import domain.model.GroupWithRole
+import model.GroupWithRole
 import domain.model.UserGroup
 import domain.repository.GroupRepository
 import model.UserId
@@ -20,7 +20,6 @@ import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
 import org.slf4j.LoggerFactory
 import repository.UserRoleProvider
@@ -47,24 +46,22 @@ class GroupRepositoryImpl: GroupRepository, UserRoleProvider {
         try {
             val timestamp = System.currentTimeMillis()
 
-            transaction {
-                GroupTable.insert {
-                    it[groupId] = group.groupId.value
-                    it[name] = group.name
-                    it[description] = group.description
-                    it[address] = group.address
-                    it[createdAt] = group.createdAt
-                    it[lastUpdated] = group.lastUpdated
-                    it[serverUpdatedAt] = timestamp
-                }
+            GroupTable.insert {
+                it[groupId] = group.groupId.value
+                it[name] = group.name
+                it[description] = group.description
+                it[address] = group.address
+                it[createdAt] = group.createdAt
+                it[lastUpdated] = group.lastUpdated
+                it[serverUpdatedAt] = timestamp
+            }
 
-                UserGroupTable.insert {
-                    it[userId] = owner.userId.value
-                    it[groupId] = group.groupId.value
-                    it[role] = owner.role.name
-                    it[joinedAt] = owner.joinedAt
-                    it[serverUpdatedAt] = timestamp
-                }
+            UserGroupTable.insert {
+                it[userId] = owner.userId.value
+                it[groupId] = group.groupId.value
+                it[role] = owner.role.name
+                it[joinedAt] = owner.joinedAt
+                it[serverUpdatedAt] = timestamp
             }
 
             DomainResult.Success(

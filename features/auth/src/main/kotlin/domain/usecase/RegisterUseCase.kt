@@ -7,6 +7,10 @@ import domain.model.UserSession
 import domain.repository.AuthRepository
 import domain.security.PasswordHasher
 import domain.security.TokenProvider
+import model.AppRole
+import model.Group
+import model.GroupId
+import model.GroupWithRole
 import result.DomainResult
 import result.ErrorType
 import validation.ValidationRules
@@ -71,8 +75,17 @@ class RegisterUseCase (
             lastUpdated = timeStamp
         )
 
+        val newGroup = Group(
+            groupId = GroupId("Group-${UUID.randomUUID()}"),
+            name = "${sanitizedName}'s Inventory",
+            description = null,
+            address = null,
+            createdAt = timeStamp,
+            lastUpdated = timeStamp
+        )
+
         return when(
-            val result = authRepository.registerUser(newUser)
+            val result = authRepository.registerUser(newUser, newGroup)
         ) {
             is DomainResult.Success -> {
                 val createdUser = result.data
@@ -86,9 +99,15 @@ class RegisterUseCase (
                     expiresAt = expiresAt
                 )
 
+                val newGroupWithRole = GroupWithRole(
+                    group = newGroup,
+                    role = AppRole.OWNER
+                )
+
                 DomainResult.Success(
                     UserSession(
                         user = createdUser,
+                        groups = listOf(newGroupWithRole),
                         tokens = AuthTokens(
                             accessToken = accessToken,
                             refreshToken = refreshToken

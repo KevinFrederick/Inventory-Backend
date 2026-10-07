@@ -1,7 +1,7 @@
 package domain.usecase.group
 
-import domain.model.Group
-import domain.model.GroupWithRole
+import model.Group
+import model.GroupWithRole
 import model.AppRole
 import model.GroupId
 import domain.model.UserGroup

@@ -1,10 +1,10 @@
 package domain.repository
 
-import domain.model.Group
+import model.Group
 import model.AppRole
 import model.GroupId
 import domain.model.GroupMember
-import domain.model.GroupWithRole
+import model.GroupWithRole
 import domain.model.UserGroup
 import model.UserId
 import result.DomainResult

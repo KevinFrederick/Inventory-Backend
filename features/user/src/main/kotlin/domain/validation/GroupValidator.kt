@@ -1,6 +1,6 @@
 package domain.validation
 
-import domain.model.Group
+import model.Group
 import result.DomainResult
 import validation.ValidationResult
 import validation.ValidationRules

@@ -1,11 +1,11 @@
 package api.mapper
 
 import api.dto.response.GroupMemberResponse
-import api.dto.response.GroupResponse
-import api.dto.response.UserGroupResponse
-import domain.model.Group
+import dto.GroupResponse
+import dto.UserGroupResponse
+import model.Group
 import domain.model.GroupMember
-import domain.model.GroupWithRole
+import model.GroupWithRole
 
 fun Group.toResponse(): GroupResponse =
     GroupResponse(

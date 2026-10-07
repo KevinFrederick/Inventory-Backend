@@ -4,11 +4,15 @@ import DatabaseFactory.dbQuery
 import mapper.toDomain
 import data.mapper.toRefreshToken
 import data.table.auth.RefreshTokenTable
+import data.table.user.GroupTable
+import data.table.user.UserGroupTable
 import data.table.user.UserTable
 import domain.model.RefreshToken
 import model.User
 import model.UserId
 import domain.repository.AuthRepository
+import model.AppRole
+import model.Group
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.lessEq
 import org.jetbrains.exposed.v1.exceptions.ExposedSQLException
@@ -21,7 +25,7 @@ import result.ErrorType
 import java.util.UUID
 
 class AuthRepositoryImpl: AuthRepository {
-    override suspend fun registerUser(user: User): DomainResult<User> = dbQuery {
+    override suspend fun registerUser(user: User, group: Group): DomainResult<User> = dbQuery {
         try {
             val timeStamp = System.currentTimeMillis()
 
@@ -39,6 +43,23 @@ class AuthRepositoryImpl: AuthRepository {
                 it[createdAt] = user.createdAt
                 it[lastUpdated] = user.lastUpdated
                 it[serverUpdatedAt] = timeStamp
+            }
+
+            GroupTable.insert {
+                it[groupId] = group.groupId.value
+                it[name] = group.name
+                it[description] = group.description
+                it[address] = group.address
+                it[createdAt] = group.createdAt
+                it[lastUpdated] = group.lastUpdated
+                it[serverUpdatedAt] = timeStamp
+            }
+
+            UserGroupTable.insert {
+                it[userId] = user.userId.value
+                it[groupId] = group.groupId.value
+                it[role] = AppRole.OWNER.name
+                it[joinedAt] = timeStamp
             }
 
             DomainResult.Success(user)

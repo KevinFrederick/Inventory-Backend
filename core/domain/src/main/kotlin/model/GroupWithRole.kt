@@ -1,6 +1,4 @@
-package domain.model
-
-import model.AppRole
+package model
 
 data class GroupWithRole(
     val group: Group,

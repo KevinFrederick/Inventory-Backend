@@ -62,7 +62,8 @@ fun Route.authRoute() {
                         AuthResponse(
                             accessToken = session.tokens.accessToken,
                             refreshToken = session.tokens.refreshToken,
-                            user = session.user.toResponse()
+                            user = session.user.toResponse(),
+                            groups = session.groups.map { it.toResponse() },
                         )
                     )
                 }
@@ -86,7 +87,8 @@ fun Route.authRoute() {
                         AuthResponse(
                             accessToken = session.tokens.accessToken,
                             refreshToken = session.tokens.refreshToken,
-                            user = session.user.toResponse()
+                            user = session.user.toResponse(),
+                            groups = session.groups.map { it.toResponse() },
                         )
                     )
                 }

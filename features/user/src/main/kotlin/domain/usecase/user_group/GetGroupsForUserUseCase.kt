@@ -1,6 +1,6 @@
 package domain.usecase.user_group
 
-import domain.model.GroupWithRole
+import model.GroupWithRole
 import domain.repository.GroupRepository
 import model.UserId
 import result.DomainResult
