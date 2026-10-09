@@ -34,6 +34,7 @@ class InsertProductUseCase (
 
         val product = Product(
             productId = productParams.productId,
+            groupId = groupId,
             category = category,
             name = productParams.name,
             description = productParams.description,

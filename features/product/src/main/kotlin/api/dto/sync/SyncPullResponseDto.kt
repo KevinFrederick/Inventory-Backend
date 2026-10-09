@@ -16,5 +16,7 @@ data class SyncPullResponseDto(
     val deletedProducts: List<String>,
     val deletedBatches: List<String>,
 
+    val groupId: String,
+
     val serverTimeStamp: Long,
 )

@@ -24,7 +24,6 @@ import domain.usecase.user_group.UserGroupUseCases
 import domain.validation.GroupValidator
 import domain.validation.UserValidator
 import org.koin.core.qualifier.named
-import org.koin.dsl.bind
 import org.koin.dsl.binds
 import org.koin.dsl.module
 import repository.UserRoleProvider

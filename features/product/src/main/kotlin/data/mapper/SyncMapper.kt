@@ -8,12 +8,14 @@ import domain.model.LocationId
 import domain.model.ProductId
 import domain.model.sync.SyncProduct
 import domain.model.sync.SyncStockBatch
+import model.GroupId
 import org.jetbrains.exposed.v1.core.ResultRow
 
 fun ResultRow.toSyncProduct(): SyncProduct =
     SyncProduct(
         productId = ProductId(this[ProductTable.productId]),
         categoryId = CategoryId(this[ProductTable.categoryId]),
+        groupId = GroupId(this[ProductTable.groupId]),
         name = this[ProductTable.name],
         description = this[ProductTable.description],
         barcode = this[ProductTable.barcode],
@@ -30,6 +32,7 @@ fun ResultRow.toSyncStockBatch(): SyncStockBatch =
         batchId = BatchId(this[StockBatchTable.batchId]),
         productId = ProductId(this[StockBatchTable.productId]),
         locationId = LocationId(this[StockBatchTable.locationId]),
+        groupId = GroupId(this[StockBatchTable.groupId]),
         quantity = this[StockBatchTable.quantity],
         price = this[StockBatchTable.price],
         expirationDate = this[StockBatchTable.expirationDate],

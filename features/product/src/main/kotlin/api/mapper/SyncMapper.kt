@@ -14,12 +14,14 @@ import domain.model.sync.SyncProduct
 import domain.model.sync.SyncPullResponse
 import domain.model.sync.SyncPushResponse
 import domain.model.sync.SyncStockBatch
+import model.GroupId
 import util.cleanInlineSpaces
 
 fun SyncProductDto.toDomain(): SyncProduct =
     SyncProduct(
         productId = ProductId(this.productId),
         categoryId = CategoryId(this.categoryId),
+        groupId = GroupId(this.groupId),
         name = this.name.cleanInlineSpaces(),
         description = this.description?.cleanInlineSpaces(),
         barcode = this.barcode?.trim(),
@@ -36,6 +38,7 @@ fun SyncStockBatchDto.toDomain(): SyncStockBatch =
         batchId = BatchId(this.batchId),
         productId = ProductId(this.productId),
         locationId = LocationId(this.locationId),
+        groupId = GroupId(this.groupId),
         quantity = this.quantity,
         price = this.price,
         expirationDate = this.expirationDate,
@@ -44,14 +47,14 @@ fun SyncStockBatchDto.toDomain(): SyncStockBatch =
         lastUpdated = this.lastUpdated
     )
 
-fun SyncPayloadDto.toDomain(): SyncPayload =
+fun SyncPayloadDto.toDomain(groupId: GroupId): SyncPayload =
     SyncPayload(
-        createdCategories = this.createdCategories.map { it.toDomain() },
-        updatedCategories = this.updatedCategories.map { it.toDomain() },
+        createdCategories = this.createdCategories.map { it.toDomain(groupId) },
+        updatedCategories = this.updatedCategories.map { it.toDomain(groupId) },
         deletedCategories = this.deletedCategories.map { CategoryId(it) },
 
-        createdLocations = this.createdLocations.map { it.toDomain() },
-        updatedLocations = this.updatedLocations.map { it.toDomain() },
+        createdLocations = this.createdLocations.map { it.toDomain(groupId) },
+        updatedLocations = this.updatedLocations.map { it.toDomain(groupId) },
         deletedLocations = this.deletedLocations.map { LocationId(it) },
 
         createdProduct = this.createdProduct.map { it.toDomain() },
@@ -67,6 +70,7 @@ fun SyncProduct.toDto(): SyncProductDto =
     SyncProductDto(
         productId = this.productId.value,
         categoryId = this.categoryId.value,
+        groupId = this.groupId.value,
         name = this.name,
         description = this.description,
         barcode = this.barcode,
@@ -83,6 +87,7 @@ fun SyncStockBatch.toDto(): SyncStockBatchDto =
         batchId = this.batchId.value,
         productId = this.productId.value,
         locationId = this.locationId.value,
+        groupId = this.groupId.value,
         quantity = this.quantity,
         price = this.price,
         expirationDate = this.expirationDate,
@@ -93,6 +98,7 @@ fun SyncStockBatch.toDto(): SyncStockBatchDto =
 
 fun SyncPushResponse.toDto(): SyncPushResponseDto =
     SyncPushResponseDto(
+        groupId = this.groupId.value,
         success = this.success,
         message = this.message,
         serverTimeStamp = this.serverTimeStamp
@@ -100,6 +106,8 @@ fun SyncPushResponse.toDto(): SyncPushResponseDto =
 
 fun SyncPullResponse.toDto(): SyncPullResponseDto =
     SyncPullResponseDto(
+        groupId = this.groupId.value,
+
         categories = this.categories.map { it.toResponse() },
         locations = this.locations.map { it.toResponse() },
         products = this.products.map { it.toDto() },

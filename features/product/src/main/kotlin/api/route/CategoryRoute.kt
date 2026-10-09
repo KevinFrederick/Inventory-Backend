@@ -84,14 +84,15 @@ fun Route.categoryRoutes() {
         rateLimit (RateLimitName("upload_limit")) {
             post <CategoryResource> { request ->
                 val groupId = GroupId(request.parent.groupId)
-                val categoryRequest = call.receive<CategoryRequest>()
-                val category = categoryRequest.toDomain()
 
                 call.verifyGroupAccess(
                     groupId = groupId,
                     verifyUserGroupRole = verifyUserGroupRoleUseCase,
                     allowedRoles = listOf(AppRole.OWNER, AppRole.ADMIN)
                 ) ?: return@post
+
+                val categoryRequest = call.receive<CategoryRequest>()
+                val category = categoryRequest.toDomain(groupId)
 
                 when(
                     val result = useCases.insertCategory(
@@ -109,15 +110,16 @@ fun Route.categoryRoutes() {
         rateLimit (RateLimitName("upload_limit")) {
             put <CategoryResource.Id> { request ->
                 val groupId = GroupId(request.parent.parent.groupId)
-                val categoryId = CategoryId(request.categoryId)
-                val categoryRequest = call.receive<CategoryRequest>()
-                val updatedCategory = categoryRequest.toDomain()
 
                 call.verifyGroupAccess(
                     groupId = groupId,
                     verifyUserGroupRole = verifyUserGroupRoleUseCase,
                     allowedRoles = listOf(AppRole.OWNER, AppRole.ADMIN)
                 ) ?: return@put
+
+                val categoryId = CategoryId(request.categoryId)
+                val categoryRequest = call.receive<CategoryRequest>()
+                val updatedCategory = categoryRequest.toDomain(groupId)
 
                 when(
                     val result = useCases.updateCategory(

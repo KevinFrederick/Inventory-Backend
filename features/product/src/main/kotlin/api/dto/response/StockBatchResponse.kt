@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class StockBatchResponse(
     val batchId: String,
+    val groupId: String,
     val productId: String,
     val location: LocationResponse,
     val quantity: Int,

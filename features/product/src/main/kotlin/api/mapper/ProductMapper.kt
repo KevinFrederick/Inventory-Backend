@@ -27,6 +27,7 @@ fun ProductRequest.toDomainParams(): ProductParams =
 fun Product.toResponse(): ProductResponse =
     ProductResponse(
         productId = this.productId.value,
+        groupId = this.groupId.value,
         category = this.category.toResponse(),
         name = this.name,
         description = this.description,

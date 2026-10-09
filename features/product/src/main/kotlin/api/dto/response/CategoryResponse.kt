@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CategoryResponse(
     val categoryId: String,
+    val groupId: String,
     val name: String,
     val description: String?,
     val createdAt: Long,
