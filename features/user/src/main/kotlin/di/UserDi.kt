@@ -13,6 +13,8 @@ import domain.usecase.user.DeleteUserUseCase
 import domain.usecase.user.GetUserByIdUseCase
 import domain.usecase.user.UpdateUserUseCase
 import domain.usecase.user.UserUseCases
+import domain.usecase.user.image.DeleteProfilePictureUseCase
+import domain.usecase.user.image.UploadProfilePictureUseCase
 import domain.usecase.user_group.AddUserToGroupUseCase
 import domain.usecase.user_group.GetGroupMembersUseCase
 import domain.usecase.user_group.GetGroupsForUserUseCase
@@ -21,6 +23,7 @@ import domain.usecase.user_group.UpdateMemberRoleUseCase
 import domain.usecase.user_group.UserGroupUseCases
 import domain.validation.GroupValidator
 import domain.validation.UserValidator
+import org.koin.core.qualifier.named
 import org.koin.dsl.bind
 import org.koin.dsl.binds
 import org.koin.dsl.module
@@ -36,12 +39,16 @@ val userModule = module {
 
     factory { GetUserByIdUseCase(get()) }
     factory { UpdateUserUseCase(get(), get()) }
+    factory { UploadProfilePictureUseCase(get(named("UserStorage")), get()) }
     factory { DeleteUserUseCase(get()) }
+    factory { DeleteProfilePictureUseCase(get(named("UserStorage")), get()) }
     factory {
         UserUseCases(
             getUserById = get(),
             updateUser = get(),
-            deleteUser = get()
+            deleteUser = get(),
+            uploadProfilePicture = get(),
+            deleteProfilePicture = get()
         )
     }
 

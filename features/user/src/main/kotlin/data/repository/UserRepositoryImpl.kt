@@ -7,6 +7,7 @@ import mapper.toDomain
 import model.User
 import model.UserId
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.exceptions.ExposedSQLException
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.update
@@ -58,6 +59,29 @@ class UserRepositoryImpl: UserRepository {
         }
     }
 
+    override suspend fun updateUserProfile(
+        userId: UserId,
+        imagePath: String
+    ): DomainResult<Unit> = dbQuery {
+        try {
+            val timestamp = System.currentTimeMillis()
+
+            val updatedRows = UserTable.update({
+                UserTable.userId eq userId.value
+            }) {
+                it[avatarUrl] = imagePath
+                it[lastUpdated] = timestamp
+                it[serverUpdatedAt] = timestamp
+            }
+
+            if (updatedRows == 0) return@dbQuery DomainResult.Error("User not found", ErrorType.NOT_FOUND)
+
+            DomainResult.Success(Unit)
+        } catch (e: ExposedSQLException) {
+            DomainResult.Error(e.message ?: "Unknown error", ErrorType.UNKNOWN)
+        }
+    }
+
     override suspend fun deleteUser(userId: UserId): DomainResult<Unit> = dbQuery {
         try {
             val deletedRows = UserTable.deleteWhere { UserTable.userId eq userId.value }
@@ -69,6 +93,26 @@ class UserRepositoryImpl: UserRepository {
             }
         } catch (e: Exception) {
             DomainResult.Error(e.localizedMessage ?: "Unknown Error", ErrorType.UNKNOWN)
+        }
+    }
+
+    override suspend fun deleteUserProfilePicture(userId: UserId): DomainResult<Unit> = dbQuery {
+        try {
+            val timestamp = System.currentTimeMillis()
+
+            val updatedRows = UserTable.update({
+                UserTable.userId eq userId.value
+            }) {
+                it[avatarUrl] = null
+                it[lastUpdated] = timestamp
+                it[serverUpdatedAt] = timestamp
+            }
+
+            if (updatedRows == 0) return@dbQuery DomainResult.Error("User not found", ErrorType.NOT_FOUND)
+
+            DomainResult.Success(Unit)
+        } catch (e: ExposedSQLException) {
+            DomainResult.Error(e.message ?: "Unknown error", ErrorType.UNKNOWN)
         }
     }
 }
