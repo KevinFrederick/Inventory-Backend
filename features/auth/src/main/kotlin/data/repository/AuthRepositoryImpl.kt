@@ -60,6 +60,7 @@ class AuthRepositoryImpl: AuthRepository {
                 it[groupId] = group.groupId.value
                 it[role] = AppRole.OWNER.name
                 it[joinedAt] = timeStamp
+                it[serverUpdatedAt] = timeStamp
             }
 
             DomainResult.Success(user)
