@@ -5,16 +5,20 @@ import api.mapper.toResponse
 import util.userId
 import domain.usecase.user.UserUseCases
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.content.PartData
+import io.ktor.http.content.forEachPart
 import io.ktor.resources.Resource
 import io.ktor.server.auth.authenticate
 import io.ktor.server.plugins.ratelimit.RateLimitName
 import io.ktor.server.plugins.ratelimit.rateLimit
 import io.ktor.server.request.receive
+import io.ktor.server.request.receiveMultipart
 import io.ktor.server.resources.delete
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.resources.get
 import io.ktor.server.resources.put
+import io.ktor.utils.io.toByteArray
 import kotlinx.serialization.Serializable
 import model.UserId
 import org.koin.ktor.ext.inject
@@ -23,7 +27,11 @@ import util.toHttpStatusCode
 
 @Serializable
 @Resource("/me")
-class UserResource
+class UserResource {
+    @Serializable
+    @Resource("image")
+    class Image(val parent: UserResource)
+}
 
 fun Route.userRoute() {
     val useCases: UserUseCases by inject()
@@ -67,6 +75,48 @@ fun Route.userRoute() {
             }
         }
 
+        // Upload Profile
+        rateLimit ( RateLimitName("upload_limit")) {
+            put<UserResource.Image> {
+                val userId = call.userId
+                    ?: return@put call.respond(HttpStatusCode.Unauthorized)
+
+                var fileBytes: ByteArray? = null
+
+                val multipartData = call.receiveMultipart()
+                multipartData.forEachPart { partData ->
+                    when (partData) {
+                        is PartData.FileItem -> {
+                            fileBytes = partData.provider().toByteArray()
+                        }
+                        else -> {}
+                    }
+
+                    partData.release()
+                }
+
+                val finalBytes = fileBytes
+                if (finalBytes == null) {
+                    call.respond(HttpStatusCode.BadRequest, "No image file provided")
+                    return@put
+                }
+
+                when(
+                    val result = useCases.uploadProfilePicture(
+                        userId = UserId(userId),
+                        fileBytes = finalBytes
+                    )
+                ) {
+                    is DomainResult.Success -> {
+                        call.respond(HttpStatusCode.OK, result.data)
+                    }
+                    is DomainResult.Error -> {
+                        call.respond(result.errorType.toHttpStatusCode(), result.message)
+                    }
+                }
+            }
+        }
+
         // Delete User
         delete<UserResource> {
             val userId = call.userId
@@ -74,6 +124,19 @@ fun Route.userRoute() {
 
             when(
                 val result = useCases.deleteUser(UserId(userId))
+            ) {
+                is DomainResult.Success -> call.respond(HttpStatusCode.NoContent)
+                is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
+            }
+        }
+
+        // Delete Profile Picture
+        delete<UserResource.Image> {
+            val userId = call.userId
+                ?: return@delete call.respond(HttpStatusCode.Unauthorized)
+
+            when(
+                val result = useCases.deleteProfilePicture(UserId(userId))
             ) {
                 is DomainResult.Success -> call.respond(HttpStatusCode.NoContent)
                 is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)

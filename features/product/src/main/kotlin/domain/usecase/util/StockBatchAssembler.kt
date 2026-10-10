@@ -45,6 +45,7 @@ class StockBatchAssembler (
                 StockBatch(
                     batchId = batchId,
                     productId = productId,
+                    groupId = groupId,
                     location = location,
                     quantity = quantity,
                     price = price,

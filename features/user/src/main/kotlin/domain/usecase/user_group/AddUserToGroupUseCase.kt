@@ -1,5 +1,6 @@
 package domain.usecase.user_group
 
+import domain.model.GroupMember
 import model.AppRole
 import model.GroupId
 import domain.model.UserGroup
@@ -22,7 +23,7 @@ class AddUserToGroupUseCase (
         groupId: GroupId,
         targetEmail: String,
         assignRole: AppRole
-    ): DomainResult<Unit> {
+    ): DomainResult<GroupMember> {
         val emailErrors = ValidationRules.validateEmail(
             item = targetEmail,
             getId = {"Target Email"},

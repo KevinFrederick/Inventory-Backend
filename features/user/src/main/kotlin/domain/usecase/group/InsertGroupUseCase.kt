@@ -1,6 +1,7 @@
 package domain.usecase.group
 
-import domain.model.Group
+import model.Group
+import model.GroupWithRole
 import model.AppRole
 import model.GroupId
 import domain.model.UserGroup
@@ -21,7 +22,7 @@ class InsertGroupUseCase (
         name: String,
         description: String?,
         address: String?,
-    ): DomainResult<Group> {
+    ): DomainResult<GroupWithRole> {
         val sanitizedName = name.cleanInlineSpaces().toTitleCase()
         val timestamp = System.currentTimeMillis()
 

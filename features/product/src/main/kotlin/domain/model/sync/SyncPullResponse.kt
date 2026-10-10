@@ -6,8 +6,11 @@ import domain.model.CategoryId
 import domain.model.Location
 import domain.model.LocationId
 import domain.model.ProductId
+import model.GroupId
 
 data class SyncPullResponse(
+    val groupId: GroupId,
+
     val categories: List<Category>,
     val locations: List<Location>,
     val products: List<SyncProduct>,

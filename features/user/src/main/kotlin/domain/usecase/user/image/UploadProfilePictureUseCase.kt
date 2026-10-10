@@ -1,25 +1,23 @@
-package domain.usecase.product.image
+package domain.usecase.user.image
 
 import domain.ImageStorageService
-import domain.model.ProductId
-import domain.repository.ProductRepository
-import util.convertToJpgBytes
-import model.GroupId
+import domain.repository.UserRepository
+import model.UserId
 import result.DomainResult
 import result.ErrorType
+import util.convertToJpgBytes
 
-class UploadProductImageUseCase(
+class UploadProfilePictureUseCase (
     private val imageStorageService: ImageStorageService,
-    private val productRepository: ProductRepository
+    private val userRepository: UserRepository
 ) {
     companion object {
         private const val MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024
     }
 
     suspend operator fun invoke(
-        productId: ProductId,
-        fileBytes: ByteArray,
-        groupId: GroupId
+        userId: UserId,
+        fileBytes: ByteArray
     ): DomainResult<String> {
         if (fileBytes.size > MAX_FILE_SIZE_BYTES) {
             return DomainResult.Error(
@@ -29,7 +27,7 @@ class UploadProductImageUseCase(
         }
 
         val jpgBytes = convertToJpgBytes(fileBytes)
-        val filename = "${productId.value}.jpg"
+        val filename = "${userId.value}.jpg"
 
         val uploadResult = when(
             val result = imageStorageService.saveImage(jpgBytes, filename)
@@ -39,11 +37,9 @@ class UploadProductImageUseCase(
         }
 
         when(
-            val result = productRepository.updateProductImage(
-                productId = productId,
-                imageUriPath = uploadResult,
-                updatedAt = System.currentTimeMillis(),
-                groupId = groupId
+            val result = userRepository.updateUserProfile(
+                userId = userId,
+                imagePath = uploadResult
             )
         ) {
             is DomainResult.Success -> Unit

@@ -43,6 +43,7 @@ import domain.validation.CategoryValidator
 import domain.validation.LocationValidator
 import domain.validation.ProductValidator
 import domain.validation.StockBatchValidator
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val productModule = module {
@@ -62,9 +63,9 @@ val productModule = module {
     factory { GetProductByIdUseCase(get()) }
     factory { InsertProductUseCase(get(), get(), get(), get()) }
     factory { UpdateProductUseCase(get(), get(), get(), get()) }
-    factory { UploadProductImageUseCase(get(), get())}
+    factory { UploadProductImageUseCase(get(named("ProductStorage")), get())}
     factory { DeleteProductUseCase(get()) }
-    factory { DeleteProductImageUseCase(get(), get()) }
+    factory { DeleteProductImageUseCase(get(named("ProductStorage")), get()) }
     factory {
         ProductUseCases(
             getAllProduct = get(),

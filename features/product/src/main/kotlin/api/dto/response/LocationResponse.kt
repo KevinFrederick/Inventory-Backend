@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class LocationResponse(
     val locationId: String,
+    val groupId: String,
     val name: String,
     val description: String?,
     val locationBarcode: String?,

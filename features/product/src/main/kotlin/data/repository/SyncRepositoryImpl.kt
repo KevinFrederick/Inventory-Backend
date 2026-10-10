@@ -193,6 +193,7 @@ class SyncRepositoryImpl: SyncRepository {
                 }
 
                 SyncPushResponse(
+                    groupId = groupId,
                     success = true,
                     message = "Sync Success",
                     serverTimeStamp = timeStamp
@@ -256,6 +257,7 @@ class SyncRepositoryImpl: SyncRepository {
                     .map { BatchId(it[DeletedTable.entityId]) }
 
                 SyncPullResponse(
+                    groupId = groupId,
                     categories = updatedCategories,
                     locations = updatedLocations,
                     products = updatedProduct,

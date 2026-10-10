@@ -1,8 +1,7 @@
 package api.route
 
 import api.dto.request.AddMemberRequest
-import api.dto.request.InsertGroupRequest
-import api.dto.request.UpdateGroupRequest
+import api.dto.request.GroupRequest
 import api.dto.request.UpdateMemberRoleRequest
 import api.mapper.toResponse
 import util.userId
@@ -38,7 +37,7 @@ fun Route.groupRoute() {
                 val requesterId = call.userId
                     ?: return@post call.respond(HttpStatusCode.Unauthorized)
 
-                val groupRequest = call.receive<InsertGroupRequest>()
+                val groupRequest = call.receive<GroupRequest>()
 
                 when(
                     val result = groupUseCases.insertGroup(
@@ -73,7 +72,7 @@ fun Route.groupRoute() {
                         assignRole = assignRole
                     )
                 ) {
-                    is DomainResult.Success -> call.respond(HttpStatusCode.OK, "Successfully added")
+                    is DomainResult.Success -> call.respond(HttpStatusCode.OK, result.data.toResponse())
                     is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
                 }
             }
@@ -132,7 +131,7 @@ fun Route.groupRoute() {
                 ?: return@put call.respond(HttpStatusCode.Unauthorized)
 
             val groupId = request.groupId
-            val groupRequest = call.receive<UpdateGroupRequest>()
+            val groupRequest = call.receive<GroupRequest>()
 
             when(
                 val result = groupUseCases.updateGroup(

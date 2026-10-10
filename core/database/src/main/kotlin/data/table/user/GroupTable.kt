@@ -4,7 +4,7 @@ import org.jetbrains.exposed.v1.core.Table
 
 object GroupTable: Table("groups") {
     val groupId = varchar("group_id", 64)
-    val name = varchar("group_name", 255).uniqueIndex()
+    val name = varchar("group_name", 255)
     val description = text("description").nullable()
     val address = text("address").nullable()
     val createdAt = long("created_at")

@@ -7,7 +7,6 @@ import api.mapper.toResponse
 import domain.model.LocationId
 import result.DomainResult
 import domain.usecase.location.LocationUseCases
-import io.ktor.client.request.request
 import io.ktor.http.HttpStatusCode
 import io.ktor.resources.Resource
 import io.ktor.server.auth.authenticate
@@ -85,14 +84,15 @@ fun Route.locationRoutes() {
         rateLimit (RateLimitName("upload_limit")) {
             post <LocationResource> { request ->
                 val groupId = GroupId(request.parent.groupId)
-                val locationRequest = call.receive<LocationRequest>()
-                val location = locationRequest.toDomain()
 
                 call.verifyGroupAccess(
                     groupId = groupId,
                     verifyUserGroupRole = verifyUserGroupRoleUseCase,
                     allowedRoles = listOf(AppRole.OWNER, AppRole.ADMIN)
                 ) ?: return@post
+
+                val locationRequest = call.receive<LocationRequest>()
+                val location = locationRequest.toDomain(groupId)
 
                 when(
                     val result = useCases.insertLocation(
@@ -110,15 +110,16 @@ fun Route.locationRoutes() {
         rateLimit (RateLimitName("upload_limit")) {
             put <LocationResource.Id> { request ->
                 val groupId = GroupId(request.parent.parent.groupId)
-                val locationId = LocationId(request.locationId)
-                val locationRequest = call.receive<LocationRequest>()
-                val updatedLocation = locationRequest.toDomain()
 
                 call.verifyGroupAccess(
                     groupId = groupId,
                     verifyUserGroupRole = verifyUserGroupRoleUseCase,
                     allowedRoles = listOf(AppRole.OWNER, AppRole.ADMIN)
                 ) ?: return@put
+
+                val locationId = LocationId(request.locationId)
+                val locationRequest = call.receive<LocationRequest>()
+                val updatedLocation = locationRequest.toDomain(groupId)
 
                 when (
                     val result = useCases.updateLocation(

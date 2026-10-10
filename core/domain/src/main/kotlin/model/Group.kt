@@ -1,10 +1,10 @@
-package api.dto.response
+package model
 
-import kotlinx.serialization.Serializable
+@JvmInline
+value class GroupId(val value: String)
 
-@Serializable
-data class GroupResponse(
-    val groupId: String,
+data class Group(
+    val groupId: GroupId,
     val name: String,
     val description: String?,
     val address: String?,

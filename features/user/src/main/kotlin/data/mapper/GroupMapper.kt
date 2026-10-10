@@ -1,7 +1,7 @@
 package data.mapper
 
 import data.table.user.GroupTable
-import domain.model.Group
+import model.Group
 import model.GroupId
 import org.jetbrains.exposed.v1.core.ResultRow
 

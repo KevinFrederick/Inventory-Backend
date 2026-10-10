@@ -4,6 +4,7 @@ import data.MinioImageStorageService
 import domain.ImageStorageService
 import io.ktor.server.config.ApplicationConfig
 import io.minio.MinioClient
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import util.getSecret
 
@@ -18,11 +19,19 @@ fun storageModule (config: ApplicationConfig) = module {
             .build()
     }
 
-    single<ImageStorageService> (createdAtStart = true) {
+    single<ImageStorageService> (named("ProductStorage"), createdAtStart = true) {
         MinioImageStorageService(
             minioClient = get(),
             publicBaseUrl = config.propertyOrNull("minio.publicUrl")?.getString() ?: "http://localhost:9000",
             bucketName = "product"
+        )
+    }
+
+    single<ImageStorageService>(named("UserStorage"), createdAtStart = true) {
+        MinioImageStorageService(
+            minioClient = get(),
+            publicBaseUrl = config.propertyOrNull("minio.publicUrl")?.getString() ?: "http://localhost:9000",
+            bucketName = "user"
         )
     }
 }

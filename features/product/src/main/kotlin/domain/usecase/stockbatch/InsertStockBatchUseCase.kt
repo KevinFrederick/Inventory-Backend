@@ -36,6 +36,7 @@ class InsertStockBatchUseCase (
         val batch = StockBatch(
             batchId = batchParams.batchId,
             productId = batchParams.productId,
+            groupId = groupId,
             location = location,
             quantity = batchParams.quantity,
             price = batchParams.price,

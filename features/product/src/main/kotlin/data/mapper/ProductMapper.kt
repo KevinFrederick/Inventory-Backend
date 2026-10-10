@@ -4,11 +4,13 @@ import data.table.product.ProductTable
 import domain.model.Product
 import domain.model.ProductId
 import domain.model.StockBatch
+import model.GroupId
 import org.jetbrains.exposed.v1.core.ResultRow
 
 fun ResultRow.toProduct(batches: List<StockBatch>): Product =
     Product(
         productId = ProductId(this[ProductTable.productId]),
+        groupId = GroupId(this[ProductTable.groupId]),
         name = this[ProductTable.name],
         description = this[ProductTable.description],
         category = this.toCategory(),

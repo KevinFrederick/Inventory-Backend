@@ -82,13 +82,14 @@ fun Route.syncRoute() {
         rateLimit (RateLimitName("upload_limit")) {
             post<SyncResource> { request ->
                 val groupId = GroupId(request.parent.groupId)
-                val syncRequest = call.receive<SyncPayloadDto>()
-                val syncPayload = syncRequest.toDomain()
 
                 call.verifyGroupAccess(
                     groupId = groupId,
                     verifyUserGroupRole = verifyUserGroupRoleUseCase,
                 ) ?: return@post
+
+                val syncRequest = call.receive<SyncPayloadDto>()
+                val syncPayload = syncRequest.toDomain(groupId)
 
                 when(
                     val result = useCases.syncPush(

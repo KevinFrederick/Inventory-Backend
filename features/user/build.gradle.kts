@@ -10,6 +10,7 @@ dependencies {
     implementation(project(":core:domain"))
     implementation(project(":core:database"))
     implementation(project(":core:server"))
+    implementation(project(":core:storage"))
 
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.ktor)

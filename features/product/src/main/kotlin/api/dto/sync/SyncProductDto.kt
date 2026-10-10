@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 data class SyncProductDto(
     val productId: String,
     val categoryId: String,
+    val groupId: String,
     val name: String,
     val description: String? = null,
     val barcode: String? = null,

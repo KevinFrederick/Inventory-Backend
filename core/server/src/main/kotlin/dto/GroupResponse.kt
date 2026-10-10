@@ -1,9 +1,10 @@
-package domain.model
+package dto
 
-import model.GroupId
+import kotlinx.serialization.Serializable
 
-data class Group(
-    val groupId: GroupId,
+@Serializable
+data class GroupResponse(
+    val groupId: String,
     val name: String,
     val description: String?,
     val address: String?,

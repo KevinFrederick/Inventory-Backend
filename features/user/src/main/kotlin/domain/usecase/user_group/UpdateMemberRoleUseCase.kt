@@ -1,5 +1,6 @@
 package domain.usecase.user_group
 
+import domain.model.GroupMember
 import model.AppRole
 import model.GroupId
 import domain.repository.GroupRepository
@@ -17,7 +18,7 @@ class UpdateMemberRoleUseCase (
         targetUserId: UserId,
         groupId: GroupId,
         newRole: AppRole
-    ): DomainResult<Unit> {
+    ): DomainResult<GroupMember> {
         val requesterRole = userRoleProvider.getUserRole(requesterId, groupId)
             ?: return DomainResult.Error("You do not have permission to access this group", ErrorType.FORBIDDEN)
 

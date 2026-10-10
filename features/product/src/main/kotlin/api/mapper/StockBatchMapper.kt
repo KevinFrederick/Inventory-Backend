@@ -25,6 +25,7 @@ fun StockBatch.toResponse(): StockBatchResponse =
     StockBatchResponse(
         batchId = this.batchId.value,
         productId = this.productId.value,
+        groupId = this.groupId.value,
         location = this.location.toResponse(),
         quantity = this.quantity,
         price = this.price,

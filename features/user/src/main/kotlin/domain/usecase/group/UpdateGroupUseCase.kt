@@ -1,6 +1,6 @@
 package domain.usecase.group
 
-import domain.model.Group
+import model.GroupWithRole
 import model.AppRole
 import model.GroupId
 import domain.repository.GroupRepository
@@ -21,7 +21,7 @@ class UpdateGroupUseCase (
         name: String?,
         description: String?,
         address: String?,
-    ): DomainResult<Group> {
+    ): DomainResult<GroupWithRole> {
         val role = userRoleProvider.getUserRole(requesterId, groupId)
             ?: return DomainResult.Error("You are not a member of this group.", ErrorType.FORBIDDEN)
 
@@ -52,6 +52,18 @@ class UpdateGroupUseCase (
             is DomainResult.Success -> Unit
         }
 
-        return groupRepository.updateGroup(updatedGroup)
+        return when (
+            val result = groupRepository.updateGroup(updatedGroup)
+        ) {
+            is DomainResult.Success -> {
+                DomainResult.Success(
+                    GroupWithRole(
+                        group = result.data,
+                        role = role
+                    )
+                )
+            }
+            is DomainResult.Error -> result
+        }
     }
 }

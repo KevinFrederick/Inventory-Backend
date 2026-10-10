@@ -67,6 +67,7 @@ class LoginUserUseCase (
         return DomainResult.Success(
             UserSession(
                 user = user,
+                groups = emptyList(),
                 tokens = AuthTokens(
                     accessToken = accessToken,
                     refreshToken = refreshToken
