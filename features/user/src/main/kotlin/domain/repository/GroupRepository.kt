@@ -16,7 +16,6 @@ interface GroupRepository {
     suspend fun deleteGroup(groupId: GroupId): DomainResult<Unit>
 
     suspend fun addUserToGroup(userGroup: UserGroup): DomainResult<GroupMember>
-    suspend fun getGroupsForUser(userId: UserId): DomainResult<List<GroupWithRole>>
     suspend fun getGroupMembers(groupId: GroupId): DomainResult<List<GroupMember>>
     suspend fun updateMemberRole(userId: UserId, groupId: GroupId, newRole: AppRole): DomainResult<GroupMember>
     suspend fun removeMember(userId: UserId, groupId: GroupId): DomainResult<Unit>

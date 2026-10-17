@@ -22,11 +22,12 @@ import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.update
 import org.slf4j.LoggerFactory
+import repository.SharedGroupProvider
 import repository.UserRoleProvider
 import result.DomainResult
 import result.ErrorType
 
-class GroupRepositoryImpl: GroupRepository, UserRoleProvider {
+class GroupRepositoryImpl: GroupRepository, UserRoleProvider, SharedGroupProvider {
     private val logger = LoggerFactory.getLogger(GroupRepositoryImpl::class.java)
 
     override suspend fun getGroupById(groupId: GroupId): DomainResult<Group?> = dbQuery {
@@ -67,7 +68,8 @@ class GroupRepositoryImpl: GroupRepository, UserRoleProvider {
             DomainResult.Success(
                 GroupWithRole(
                     group = group,
-                    role = owner.role
+                    role = owner.role,
+                    joinedAt = owner.joinedAt
                 )
             )
         } catch (e: ExposedSQLException) {
@@ -153,7 +155,8 @@ class GroupRepositoryImpl: GroupRepository, UserRoleProvider {
                 .where { UserGroupTable.userId eq userId.value }
                 .map { GroupWithRole(
                     group = it.toDomain(),
-                    role = AppRole.valueOf(it[UserGroupTable.role])
+                    role = AppRole.valueOf(it[UserGroupTable.role]),
+                    joinedAt = it[UserGroupTable.joinedAt]
                 ) }
 
             DomainResult.Success(groups)

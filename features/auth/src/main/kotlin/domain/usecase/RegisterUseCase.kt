@@ -101,7 +101,8 @@ class RegisterUseCase (
 
                 val newGroupWithRole = GroupWithRole(
                     group = newGroup,
-                    role = AppRole.OWNER
+                    role = AppRole.OWNER,
+                    joinedAt = timeStamp
                 )
 
                 DomainResult.Success(

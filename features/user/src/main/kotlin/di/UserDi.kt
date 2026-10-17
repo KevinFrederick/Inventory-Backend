@@ -26,12 +26,13 @@ import domain.validation.UserValidator
 import org.koin.core.qualifier.named
 import org.koin.dsl.binds
 import org.koin.dsl.module
+import repository.SharedGroupProvider
 import repository.UserRoleProvider
 import usecase.VerifyUserGroupRoleUseCase
 
 val userModule = module {
     single <UserRepository> { UserRepositoryImpl() }
-    single { GroupRepositoryImpl() } binds arrayOf(GroupRepository::class, UserRoleProvider::class)
+    single { GroupRepositoryImpl() } binds arrayOf(GroupRepository::class, UserRoleProvider::class, SharedGroupProvider::class)
 
     factory { UserValidator() }
     factory { GroupValidator() }
@@ -51,7 +52,7 @@ val userModule = module {
         )
     }
 
-    factory { GetGroupByIdUseCase(get(), get()) }
+    factory { GetGroupByIdUseCase(get()) }
     factory { InsertGroupUseCase(get(), get()) }
     factory { UpdateGroupUseCase(get(), get(), get()) }
     factory { DeleteGroupUseCase(get(), get()) }

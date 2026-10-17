@@ -37,7 +37,7 @@ fun authModule(config: ApplicationConfig) = module {
     single <TokenProvider> { get<JwtConfig>() }
 
     single { RegisterUseCase(get(), get(), get()) }
-    single { LoginUserUseCase(get(), get(), get()) }
+    single { LoginUserUseCase(get(), get(), get(), get()) }
     single { RefreshTokenUseCase(get(), get()) }
     single { LogoutUseCase(get()) }
     factory {

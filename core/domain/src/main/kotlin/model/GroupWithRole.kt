@@ -2,5 +2,6 @@ package model
 
 data class GroupWithRole(
     val group: Group,
-    val role: AppRole
+    val role: AppRole,
+    val joinedAt: Long,
 )
