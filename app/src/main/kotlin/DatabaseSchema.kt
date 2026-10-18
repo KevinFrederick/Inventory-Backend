@@ -9,6 +9,7 @@ import data.table.product.DeletedTable
 import data.table.product.LocationTable
 import data.table.product.ProductTable
 import data.table.product.StockBatchTable
+import data.table.user.GroupInviteTable
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
@@ -24,7 +25,8 @@ fun initializeDatabaseSchema() {
             UserTable,
             GroupTable,
             UserGroupTable,
-            RefreshTokenTable
+            RefreshTokenTable,
+            GroupInviteTable
         )
     }
 }

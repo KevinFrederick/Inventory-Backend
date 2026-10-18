@@ -6,12 +6,14 @@ import domain.repository.AuthRepository
 import domain.security.PasswordHasher
 import domain.security.TokenProvider
 import domain.util.hashWithSHA256
+import repository.SharedGroupProvider
 import result.DomainResult
 import result.ErrorType
 import validation.ValidationRules
 
 class LoginUserUseCase (
     private val authRepository: AuthRepository,
+    private val groupProvider: SharedGroupProvider,
     private val passwordHasher: PasswordHasher,
     private val tokenProvider: TokenProvider,
 ) {
@@ -54,6 +56,16 @@ class LoginUserUseCase (
             )
         }
 
+        val userGroups = when(
+            val groupResult = groupProvider.getGroupsForUser(userId = user.userId)
+        ) {
+            is DomainResult.Success -> groupResult.data
+            is DomainResult.Error -> return DomainResult.Error(
+                "Failed to load user groups",
+                ErrorType.UNKNOWN
+            )
+        }
+
         val accessToken = tokenProvider.generateAccessToken(user.userId.value)
         val refreshToken = tokenProvider.generateRefreshToken()
         val expiresAt = System.currentTimeMillis() + tokenProvider.refreshTokenValidityMs
@@ -67,7 +79,7 @@ class LoginUserUseCase (
         return DomainResult.Success(
             UserSession(
                 user = user,
-                groups = emptyList(),
+                groups = userGroups,
                 tokens = AuthTokens(
                     accessToken = accessToken,
                     refreshToken = refreshToken

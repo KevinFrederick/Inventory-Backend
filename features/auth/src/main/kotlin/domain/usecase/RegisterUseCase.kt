@@ -11,6 +11,7 @@ import model.AppRole
 import model.Group
 import model.GroupId
 import model.GroupWithRole
+import model.MembershipStatus
 import result.DomainResult
 import result.ErrorType
 import validation.ValidationRules
@@ -101,7 +102,9 @@ class RegisterUseCase (
 
                 val newGroupWithRole = GroupWithRole(
                     group = newGroup,
-                    role = AppRole.OWNER
+                    role = AppRole.OWNER,
+                    status = MembershipStatus.ACTIVE,
+                    joinedAt = timeStamp
                 )
 
                 DomainResult.Success(

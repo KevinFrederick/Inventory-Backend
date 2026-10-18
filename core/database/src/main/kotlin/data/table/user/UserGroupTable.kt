@@ -15,6 +15,7 @@ object UserGroupTable: Table("user_groups") {
         ReferenceOption.CASCADE,
     )
     val role = varchar("role", 64)
+    val status = varchar("status", 32).default("ACTIVE")
     val joinedAt = long("joined_at")
     val serverUpdatedAt = long("server_updated_at")
 

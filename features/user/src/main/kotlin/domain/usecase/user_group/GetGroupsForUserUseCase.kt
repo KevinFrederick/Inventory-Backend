@@ -1,13 +1,13 @@
 package domain.usecase.user_group
 
 import model.GroupWithRole
-import domain.repository.GroupRepository
 import model.UserId
+import repository.SharedGroupProvider
 import result.DomainResult
 
 class GetGroupsForUserUseCase (
-    val groupRepository: GroupRepository
+    val groupProvider: SharedGroupProvider
 ) {
     suspend operator fun invoke(userId: UserId): DomainResult<List<GroupWithRole>> =
-        groupRepository.getGroupsForUser(userId)
+        groupProvider.getGroupsForUser(userId)
 }

@@ -2,41 +2,26 @@ package domain.usecase.group
 
 import model.GroupWithRole
 import model.GroupId
-import domain.repository.GroupRepository
 import model.UserId
-import repository.UserRoleProvider
+import repository.SharedGroupProvider
 import result.DomainResult
 import result.ErrorType
 
 class GetGroupByIdUseCase (
-    private val groupRepository: GroupRepository,
-    private val userRoleProvider: UserRoleProvider
-) {
+    private val groupProvider: SharedGroupProvider,
+    ) {
     suspend operator fun invoke(
         requesterId: UserId,
         groupId: GroupId
     ): DomainResult<GroupWithRole> {
-        val role = userRoleProvider.getUserRole(requesterId, groupId)
-            ?: return DomainResult.Error("You do not have permission to access this group", ErrorType.FORBIDDEN)
-
-        return when(
-            val result = groupRepository.getGroupById(groupId)
-        ) {
-            is DomainResult.Success -> {
-                val group = result.data
-
-                if (group == null) {
-                    DomainResult.Error("Group not found", ErrorType.NOT_FOUND)
-                } else {
-                    DomainResult.Success(
-                        GroupWithRole(
-                            group = group,
-                            role = role
-                        )
-                    )
-                }
-            }
-            is DomainResult.Error -> result
+        val userGroups = when (val result = groupProvider.getGroupsForUser(requesterId)) {
+            is DomainResult.Success -> result.data
+            is DomainResult.Error -> return DomainResult.Error("Failed to fetch membership", ErrorType.UNKNOWN)
         }
+
+        val membership = userGroups.find { it.group.groupId == groupId }
+            ?: return DomainResult.Error("You are not a member of this group.", ErrorType.FORBIDDEN)
+
+        return DomainResult.Success(membership)
     }
 }

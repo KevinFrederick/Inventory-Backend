@@ -5,15 +5,16 @@ import model.AppRole
 import model.GroupId
 import domain.repository.GroupRepository
 import domain.validation.GroupValidator
+import model.MembershipStatus
 import model.UserId
-import repository.UserRoleProvider
+import repository.SharedGroupProvider
 import result.DomainResult
 import result.ErrorType
 
 class UpdateGroupUseCase (
     private val groupRepository: GroupRepository,
     private val groupValidator: GroupValidator,
-    private val userRoleProvider: UserRoleProvider,
+    private val groupProvider: SharedGroupProvider,
 ) {
     suspend operator fun invoke(
         requesterId: UserId,
@@ -22,21 +23,23 @@ class UpdateGroupUseCase (
         description: String?,
         address: String?,
     ): DomainResult<GroupWithRole> {
-        val role = userRoleProvider.getUserRole(requesterId, groupId)
+        val userGroups = when (val result = groupProvider.getGroupsForUser(requesterId)) {
+            is DomainResult.Success -> result.data
+            is DomainResult.Error -> return DomainResult.Error("Failed to fetch membership", ErrorType.UNKNOWN)
+        }
+
+        val membership = userGroups.find { it.group.groupId == groupId }
             ?: return DomainResult.Error("You are not a member of this group.", ErrorType.FORBIDDEN)
 
-        if (role == AppRole.MEMBER) {
+        if (membership.status != MembershipStatus.ACTIVE) {
+            return DomainResult.Error("You must be an active member to perform this action.", ErrorType.FORBIDDEN)
+        }
+
+        if (membership.role == AppRole.MEMBER) {
             return DomainResult.Error("Only admins or the owner can update group details.", ErrorType.FORBIDDEN)
         }
 
-        val existingGroup = when(
-            val groupResult = groupRepository.getGroupById(groupId)
-        ) {
-            is DomainResult.Error -> return groupResult
-            is DomainResult.Success -> groupResult.data
-        }
-
-        if (existingGroup == null) return DomainResult.Error("Group not found", ErrorType.NOT_FOUND)
+        val existingGroup = membership.group
 
         val updatedGroup = existingGroup.copy(
             name = name ?: existingGroup.name,
@@ -59,7 +62,9 @@ class UpdateGroupUseCase (
                 DomainResult.Success(
                     GroupWithRole(
                         group = result.data,
-                        role = role
+                        role = membership.role,
+                        status = membership.status,
+                        joinedAt = membership.joinedAt,
                     )
                 )
             }

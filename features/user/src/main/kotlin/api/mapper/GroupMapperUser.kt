@@ -30,5 +30,7 @@ fun GroupMember.toResponse(): GroupMemberResponse =
 fun GroupWithRole.toResponse(): UserGroupResponse =
     UserGroupResponse(
         group = group.toResponse(),
-        role = role.name
+        role = role.name,
+        status = status.name,
+        joinedAt = this.joinedAt,
     )
