@@ -4,6 +4,7 @@ import api.route.authRoute
 import api.route.categoryRoutes
 import api.route.groupRoute
 import api.route.locationRoutes
+import api.route.memberRoute
 import io.ktor.server.application.Application
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
@@ -27,5 +28,6 @@ fun Application.configureRouting() {
         authRoute()
         userRoute()
         groupRoute()
+        memberRoute()
     }
 }

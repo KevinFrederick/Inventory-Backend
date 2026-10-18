@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 data class UserGroupResponse(
     val group: GroupResponse,
     val role: String,
+    val status: String,
     val joinedAt: Long
 )

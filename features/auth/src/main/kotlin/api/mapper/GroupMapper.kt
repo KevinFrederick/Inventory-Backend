@@ -19,5 +19,6 @@ fun GroupWithRole.toResponse(): UserGroupResponse =
     UserGroupResponse(
         group = group.toResponse(),
         role = role.name,
+        status = status.name,
         joinedAt = joinedAt
     )

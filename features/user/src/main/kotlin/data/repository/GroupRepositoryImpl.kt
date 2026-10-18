@@ -12,6 +12,7 @@ import domain.model.GroupMember
 import model.GroupWithRole
 import domain.model.UserGroup
 import domain.repository.GroupRepository
+import model.MembershipStatus
 import model.UserId
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
@@ -69,6 +70,7 @@ class GroupRepositoryImpl: GroupRepository, UserRoleProvider, SharedGroupProvide
                 GroupWithRole(
                     group = group,
                     role = owner.role,
+                    status = MembershipStatus.ACTIVE,
                     joinedAt = owner.joinedAt
                 )
             )
@@ -156,6 +158,7 @@ class GroupRepositoryImpl: GroupRepository, UserRoleProvider, SharedGroupProvide
                 .map { GroupWithRole(
                     group = it.toDomain(),
                     role = AppRole.valueOf(it[UserGroupTable.role]),
+                    status = MembershipStatus.valueOf(it[UserGroupTable.status]),
                     joinedAt = it[UserGroupTable.joinedAt]
                 ) }
 

@@ -5,6 +5,7 @@ import model.AppRole
 import model.GroupId
 import domain.repository.GroupRepository
 import domain.validation.GroupValidator
+import model.MembershipStatus
 import model.UserId
 import repository.SharedGroupProvider
 import result.DomainResult
@@ -29,6 +30,10 @@ class UpdateGroupUseCase (
 
         val membership = userGroups.find { it.group.groupId == groupId }
             ?: return DomainResult.Error("You are not a member of this group.", ErrorType.FORBIDDEN)
+
+        if (membership.status != MembershipStatus.ACTIVE) {
+            return DomainResult.Error("You must be an active member to perform this action.", ErrorType.FORBIDDEN)
+        }
 
         if (membership.role == AppRole.MEMBER) {
             return DomainResult.Error("Only admins or the owner can update group details.", ErrorType.FORBIDDEN)
@@ -58,6 +63,7 @@ class UpdateGroupUseCase (
                     GroupWithRole(
                         group = result.data,
                         role = membership.role,
+                        status = membership.status,
                         joinedAt = membership.joinedAt,
                     )
                 )
