@@ -24,6 +24,7 @@ fun GroupMember.toResponse(): GroupMemberResponse =
         name = this.name,
         email = this.email,
         role = this.role.name,
+        status = this.status.name,
         joinedAt = this.joinedAt
     )
 

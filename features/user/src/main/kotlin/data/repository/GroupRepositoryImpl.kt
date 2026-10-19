@@ -140,6 +140,7 @@ class GroupRepositoryImpl: GroupRepository, UserRoleProvider, SharedGroupProvide
                 name = memberResult[UserTable.name],
                 email = memberResult[UserTable.email],
                 role = AppRole.valueOf(memberResult[UserGroupTable.role]),
+                status = MembershipStatus.valueOf(memberResult[UserGroupTable.status]),
                 joinedAt = memberResult[UserGroupTable.joinedAt]
             )
 
@@ -179,6 +180,7 @@ class GroupRepositoryImpl: GroupRepository, UserRoleProvider, SharedGroupProvide
                         name = it[UserTable.name],
                         email = it[UserTable.email],
                         role = AppRole.valueOf(it[UserGroupTable.role]),
+                        status = MembershipStatus.valueOf(it[UserGroupTable.status]),
                         joinedAt = it[UserGroupTable.joinedAt]
                     )
                 }
@@ -218,6 +220,7 @@ class GroupRepositoryImpl: GroupRepository, UserRoleProvider, SharedGroupProvide
                 name = memberResult[UserTable.name],
                 email = memberResult[UserTable.email],
                 role = AppRole.valueOf(memberResult[UserGroupTable.role]),
+                status = MembershipStatus.valueOf(memberResult[UserGroupTable.status]),
                 joinedAt = memberResult[UserGroupTable.joinedAt]
             )
 

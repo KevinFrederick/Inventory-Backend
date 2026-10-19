@@ -9,5 +9,6 @@ data class GroupMemberResponse(
     val name: String,
     val email: String,
     val role: String,
+    val status: String,
     val joinedAt: Long,
 )
