@@ -13,6 +13,8 @@ fun Group.toResponse(): GroupResponse =
         name = this.name,
         description = this.description,
         address = this.address,
+        totalMembers = this.totalMembers,
+        totalProducts = this.totalProducts,
         createdAt = this.createdAt,
         lastUpdated = this.lastUpdated
     )

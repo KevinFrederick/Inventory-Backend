@@ -2,6 +2,7 @@ package data.repository
 
 import DatabaseFactory.dbQuery
 import data.mapper.toDomain
+import data.table.product.ProductTable
 import data.table.user.GroupTable
 import data.table.user.UserGroupTable
 import data.table.user.UserTable
@@ -33,10 +34,33 @@ class GroupRepositoryImpl: GroupRepository, UserRoleProvider, SharedGroupProvide
 
     override suspend fun getGroupById(groupId: GroupId): DomainResult<Group?> = dbQuery {
         try {
-            val group = GroupTable.selectAll()
+            val groupRow = GroupTable.selectAll()
                 .where { GroupTable.groupId eq groupId.value }
-                .map { it.toDomain() }
                 .singleOrNull()
+
+            if (groupRow == null) {
+                return@dbQuery DomainResult.Success(null)
+            }
+
+            val productCount = ProductTable
+                .selectAll()
+                .where { ProductTable.groupId eq groupId.value }
+                .count()
+                .toInt()
+
+            val memberCount = UserGroupTable
+                .selectAll()
+                .where {
+                    (UserGroupTable.groupId eq groupId.value) and
+                    (UserGroupTable.status eq MembershipStatus.ACTIVE.name)
+                }
+                .count()
+                .toInt()
+
+            val group = groupRow.toDomain(
+                totalMembers = memberCount,
+                totalProducts = productCount
+            )
 
             DomainResult.Success(group)
         } catch (e: Exception) {
@@ -154,14 +178,35 @@ class GroupRepositoryImpl: GroupRepository, UserRoleProvider, SharedGroupProvide
 
     override suspend fun getGroupsForUser(userId: UserId): DomainResult<List<GroupWithRole>> = dbQuery {
         try {
-            val groups = (GroupTable innerJoin UserGroupTable).selectAll()
+            val rows = (GroupTable innerJoin UserGroupTable).selectAll()
                 .where { UserGroupTable.userId eq userId.value }
-                .map { GroupWithRole(
-                    group = it.toDomain(),
-                    role = AppRole.valueOf(it[UserGroupTable.role]),
-                    status = MembershipStatus.valueOf(it[UserGroupTable.status]),
-                    joinedAt = it[UserGroupTable.joinedAt]
-                ) }
+                .toList()
+
+            val groups = rows.map { row ->
+                val currentGroupId = row[GroupTable.groupId]
+
+                val productCount = ProductTable
+                    .selectAll()
+                    .where { ProductTable.groupId eq currentGroupId }
+                    .count()
+                    .toInt()
+
+                val memberCount = UserGroupTable
+                    .selectAll()
+                    .where {
+                        (UserGroupTable.groupId eq currentGroupId) and
+                                (UserGroupTable.status eq MembershipStatus.ACTIVE.name)
+                    }
+                    .count()
+                    .toInt()
+
+                GroupWithRole(
+                    group = row.toDomain(totalMembers = memberCount, totalProducts = productCount),
+                    role = AppRole.valueOf(row[UserGroupTable.role]),
+                    status = MembershipStatus.valueOf(row[UserGroupTable.status]),
+                    joinedAt = row[UserGroupTable.joinedAt]
+                )
+            }
 
             DomainResult.Success(groups)
         } catch (e: Exception) {
