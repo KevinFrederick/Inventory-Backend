@@ -81,6 +81,8 @@ class RegisterUseCase (
             name = "${sanitizedName}'s Inventory",
             description = null,
             address = null,
+            totalMembers = 1,
+            totalProducts = 0,
             createdAt = timeStamp,
             lastUpdated = timeStamp
         )

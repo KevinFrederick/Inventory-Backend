@@ -13,6 +13,8 @@ fun Group.toResponse(): GroupResponse =
         name = this.name,
         description = this.description,
         address = this.address,
+        totalMembers = this.totalMembers,
+        totalProducts = this.totalProducts,
         createdAt = this.createdAt,
         lastUpdated = this.lastUpdated
     )
@@ -24,6 +26,7 @@ fun GroupMember.toResponse(): GroupMemberResponse =
         name = this.name,
         email = this.email,
         role = this.role.name,
+        status = this.status.name,
         joinedAt = this.joinedAt
     )
 

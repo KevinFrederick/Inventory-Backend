@@ -31,6 +31,8 @@ class InsertGroupUseCase (
             name = sanitizedName,
             description = description,
             address = address,
+            totalMembers = 1,
+            totalProducts = 0,
             createdAt = timestamp,
             lastUpdated = timestamp
         )

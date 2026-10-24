@@ -11,6 +11,8 @@ fun Group.toResponse(): GroupResponse =
         name = name,
         description = description,
         address = address,
+        totalMembers = totalMembers,
+        totalProducts = totalProducts,
         createdAt = createdAt,
         lastUpdated = lastUpdated
     )

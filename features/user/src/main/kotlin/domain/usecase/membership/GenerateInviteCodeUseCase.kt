@@ -23,7 +23,7 @@ class GenerateInviteCodeUseCase(
             return DomainResult.Error("Only Admins and Owners can generate invites.", ErrorType.FORBIDDEN)
         }
 
-        val allowedChars = ('A'..'Z').plusElement(('0'..'9'))
+        val allowedChars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789".toCharArray()
         val inviteCode = (1..8)
             .map { allowedChars[SecureRandom().nextInt(allowedChars.size)] }
             .joinToString("")
