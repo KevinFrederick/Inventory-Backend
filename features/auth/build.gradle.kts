@@ -22,6 +22,9 @@ dependencies {
 
     implementation(libs.argon2)
 
+    implementation(libs.google.api.client)
+    implementation(libs.google.api.client.gson)
+
     testImplementation(kotlin("test"))
 }
 

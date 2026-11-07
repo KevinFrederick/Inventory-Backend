@@ -13,6 +13,7 @@ import model.UserId
 import domain.repository.AuthRepository
 import model.AppRole
 import model.Group
+import model.MembershipStatus
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.lessEq
 import org.jetbrains.exposed.v1.exceptions.ExposedSQLException
@@ -59,6 +60,7 @@ class AuthRepositoryImpl: AuthRepository {
                 it[userId] = user.userId.value
                 it[groupId] = group.groupId.value
                 it[role] = AppRole.OWNER.name
+                it[status] = MembershipStatus.ACTIVE.name
                 it[joinedAt] = timeStamp
                 it[serverUpdatedAt] = timeStamp
             }

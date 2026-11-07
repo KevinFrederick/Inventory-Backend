@@ -7,6 +7,7 @@ import domain.repository.AuthRepository
 import domain.security.PasswordHasher
 import domain.security.TokenProvider
 import domain.usecase.AuthUseCases
+import domain.usecase.AuthenticateWithGoogleUseCase
 import domain.usecase.DeleteExpiredTokensUseCase
 import domain.usecase.LoginUserUseCase
 import domain.usecase.LogoutUseCase
@@ -38,12 +39,25 @@ fun authModule(config: ApplicationConfig) = module {
 
     single { RegisterUseCase(get(), get(), get()) }
     single { LoginUserUseCase(get(), get(), get(), get()) }
+    single {
+        val googleClientId = config.propertyOrNull("ktor.google.clientId")?.getString()
+            ?: throw IllegalArgumentException("Google Client ID is missing")
+
+        AuthenticateWithGoogleUseCase(
+            authRepository = get(),
+            groupProvider = get(),
+            tokenProvider = get(),
+            passwordHasher = get(),
+            googleClientId = googleClientId,
+        )
+    }
     single { RefreshTokenUseCase(get(), get()) }
     single { LogoutUseCase(get()) }
     factory {
         AuthUseCases(
             register = get(),
             login = get(),
+            authWithGoogle = get(),
             refreshToken = get(),
             logout = get(),
         )

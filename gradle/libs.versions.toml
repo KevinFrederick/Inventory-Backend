@@ -17,6 +17,8 @@ argon2Hasher = "2.12"
 
 mockk = "1.13.12"
 
+googleApiClient = "2.9.2"
+
 [libraries]
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 
@@ -40,6 +42,9 @@ minio = { module = "io.minio:minio", version.ref = "minio" }
 argon2 = { module = "de.mkammerer:argon2-jvm", version.ref = "argon2Hasher" }
 
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+
+google-api-client = { group = "com.google.api-client", name = "google-api-client", version.ref = "googleApiClient" }
+google-api-client-gson = { group = "com.google.api-client", name = "google-api-client-gson", version.ref = "googleApiClient" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
