@@ -1,6 +1,7 @@
 package com.kevinfreyap
 
 import com.kevinfreyap.plugins.configureDI
+import com.kevinfreyap.plugins.configureLogging
 import com.kevinfreyap.plugins.configureProxySupport
 import com.kevinfreyap.plugins.configureRateLimit
 import com.kevinfreyap.plugins.configureResources
@@ -26,6 +27,8 @@ fun Application.module() {
     configureSockets()
     configureSecurity()
     configureBackgroundJobs()
+
+    configureLogging()
 
     configureRouting()
 }

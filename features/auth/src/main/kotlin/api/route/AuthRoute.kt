@@ -1,5 +1,6 @@
 package api.route
 
+import api.dto.request.GoogleAuthRequest
 import api.dto.request.LoginRequest
 import api.dto.request.LogoutRequest
 import api.dto.request.RefreshTokenRequest
@@ -31,6 +32,10 @@ class AuthResource {
     @Serializable
     @Resource("/login")
     class Login(val parent: AuthResource)
+
+    @Serializable
+    @Resource("/google")
+    class Google(val parent: AuthResource)
 
     @Serializable
     @Resource("/refresh")
@@ -93,6 +98,30 @@ fun Route.authRoute() {
                     )
                 }
                 is DomainResult.Error -> call.respond(result.errorType.toHttpStatusCode(), result.message)
+            }
+        }
+
+        post<AuthResource.Google> {
+            val request = call.receive<GoogleAuthRequest>()
+
+            when(
+                val result = useCases.authWithGoogle(request.idToken)
+            ) {
+                is DomainResult.Success -> {
+                    val session = result.data
+                    call.respond(
+                        HttpStatusCode.OK,
+                        AuthResponse(
+                            accessToken = session.tokens.accessToken,
+                            refreshToken = session.tokens.refreshToken,
+                            user = session.user.toResponse(),
+                            groups = session.groups.map { it.toResponse() },
+                        )
+                    )
+                }
+                is DomainResult.Error -> {
+                    call.respond(result.errorType.toHttpStatusCode(), result.message)
+                }
             }
         }
 

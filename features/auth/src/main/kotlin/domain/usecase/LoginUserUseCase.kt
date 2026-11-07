@@ -35,7 +35,7 @@ class LoginUserUseCase (
             )
         }
 
-        val user = authRepository.findUserByEmail(email)
+        val user = authRepository.findUserByEmail(sanitizedEmail)
             ?: return DomainResult.Error(
                 "Invalid email or password",
                 ErrorType.UNAUTHORIZED
